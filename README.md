@@ -10,8 +10,6 @@
 
 [**🚀 OPEN LIVE GUIDE →**](https://felaya.github.io/OdooXG/)
 
-*(Note: GitHub Markdown doesn't support forcing links to open in new tabs. Right-click or middle-click links to open in a new tab.)*
-
 </div>
 
 ---
