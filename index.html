@@ -1,0 +1,3118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <title>Odoo Deployment Guide</title>
+<style>
+/* ═══════════════════════════════════════════════════
+   DESIGN SYSTEM — Refined Editorial + Glass
+   ═══════════════════════════════════════════════════ */
+:root {
+    --brand: #714B67;
+    --brand-light: #9B7A91;
+    --brand-glow: rgba(113,75,103,.15);
+    --accent: #017E84;
+    --ok: #16A34A;
+    --warn: #D97706;
+    --warn-bg: #FFFBEB;
+    --err: #DC2626;
+    --err-bg: #FEF2F2;
+    --info: #2563EB;
+    --info-bg: #EFF6FF;
+    --bg: #F8F9FC;
+    --surface: #FFFFFF;
+    --surface-2: #F1F3F9;
+    --text: #1A1D2E;
+    --text-2: #4A5068;
+    --text-3: #8891A5;
+    --border: #E2E5EF;
+    --border-2: #D1D5E4;
+    --code-bg: #0F1219;
+    --code-text: #E2E8F0;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-xs: 6px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.04), 0 1px 3px rgba(0,0,0,.06);
+    --shadow-md: 0 4px 6px rgba(0,0,0,.04), 0 2px 4px rgba(0,0,0,.06);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,.06), 0 5px 10px rgba(0,0,0,.04);
+    --transition: .25s cubic-bezier(.4,0,.2,1);
+    --font: 'DM Sans', system-ui, -apple-system, sans-serif;
+    --font-display: 'DM Serif Display', Georgia, serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 16px; scroll-behavior: smooth; scroll-padding-top: 80px; overflow-x: hidden; }
+body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    letter-spacing: .01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+}
+
+/* ── Scroll Progress Bar ── */
+.scroll-progress {
+    position: fixed; top: 0; left: 0; width: 0%; height: 3px; z-index: 9999;
+    background: linear-gradient(90deg, var(--brand), var(--accent));
+    transition: width .1s linear;
+}
+
+/* ── Hero Header ── */
+.hero {
+    position: relative;
+    background: linear-gradient(135deg, #1A1024 0%, #2D1B3D 30%, #1B2838 70%, #0F1923 100%);
+    color: #fff;
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+    overflow: hidden;
+}
+.hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(113,75,103,.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 30%, rgba(1,126,132,.15) 0%, transparent 50%);
+    pointer-events: none;
+}
+.hero::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+}
+.hero * { position: relative; z-index: 1; }
+.hero-badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.1);
+    padding: .5rem 1.25rem; border-radius: 2rem;
+    font-size: .82rem; font-weight: 500; letter-spacing: .03em;
+    backdrop-filter: blur(10px); margin-bottom: 1.5rem;
+}
+.hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+.hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    font-weight: 400;
+    letter-spacing: -.02em;
+    margin-bottom: .75rem;
+    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,.8) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.hero-sub {
+    font-size: 1rem; opacity: .7; max-width: 550px; margin: 0 auto 2rem; line-height: 1.6;
+}
+.hero-tags {
+    display: flex; justify-content: center; gap: .5rem; flex-wrap: wrap;
+}
+.hero-tag {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.08);
+    padding: .35rem .85rem; border-radius: 2rem;
+    font-size: .78rem; font-weight: 500;
+    backdrop-filter: blur(4px);
+    transition: var(--transition);
+}
+.hero-tag:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); }
+
+/* ── Main Layout ── */
+.layout { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem; overflow: hidden; }
+
+/* ── TOC — Glass Card Grid ── */
+.toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem 2.25rem 1.75rem;
+    margin-bottom: 2.5rem;
+    box-shadow: var(--shadow-sm);
+}
+.toc-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem; padding-bottom: .85rem;
+    border-bottom: 1px solid var(--border);
+}
+.toc-top h2 {
+    font-family: var(--font);
+    font-size: .85rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--brand); margin: 0;
+}
+.toc-top .badge {
+    font-size: .72rem; color: var(--text-3); font-weight: 500;
+    background: var(--surface-2); padding: .3rem .8rem; border-radius: 2rem;
+}
+.search-wrap { margin: 0 0 1rem; position: relative; }
+.search-wrap input {
+    width: 100%; padding: .7rem 1rem .7rem 2.6rem;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-size: .9rem; font-family: var(--font);
+    background: var(--surface-2); color: var(--text);
+    transition: var(--transition);
+}
+.search-wrap input:focus { outline: none; border-color: var(--brand); background: var(--surface); box-shadow: 0 0 0 3px var(--brand-glow); }
+.search-wrap input::placeholder { color: var(--text-3); }
+.search-wrap .s-icon { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%); font-size: 1rem; opacity: .4; pointer-events: none; }
+.search-results { margin-top: .5rem; font-size: .85rem; }
+.search-results a { display: block; padding: .4rem .7rem; border-radius: var(--radius-xs); color: var(--brand); text-decoration: none; transition: var(--transition); }
+.search-results a:hover { background: var(--brand-glow); }
+.search-results .sr-path { font-size: .72rem; color: var(--text-3); margin-left: .3rem; }
+.search-results .sr-snippet { font-size: .75rem; color: var(--text-3); margin-top: .1rem; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.toc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .85rem; }
+.toc-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.1rem;
+    background: var(--surface);
+    position: relative; overflow: hidden;
+    transition: var(--transition);
+}
+.toc-card:hover { border-color: var(--brand-light); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.toc-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 3px 3px 0 0; }
+.toc-card.tc-ov::before { background: var(--brand-light); }
+.toc-card.tc-1::before { background: var(--brand); }
+.toc-card.tc-2::before { background: var(--ok); }
+.toc-card.tc-3::before { background: var(--accent); }
+.toc-card.tc-4::before { background: var(--err); }
+.toc-card.tc-5::before { background: var(--info); }
+.tc-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .55rem; }
+.tc-head .tc-icon { font-size: 1.05rem; }
+.tc-head .tc-title { font-weight: 700; font-size: .8rem; color: var(--text); letter-spacing: .01em; }
+.tc-head .tc-badge {
+    margin-left: auto; font-size: .6rem; font-weight: 700;
+    padding: .15rem .45rem; border-radius: 4px;
+    letter-spacing: .04em; color: #fff;
+}
+.tc-1 .tc-badge { background: var(--brand); }
+.tc-2 .tc-badge { background: var(--ok); }
+.tc-3 .tc-badge { background: var(--accent); }
+.tc-4 .tc-badge { background: var(--err); }
+.tc-5 .tc-badge { background: var(--info); }
+.tc-ov .tc-badge { background: var(--brand-light); }
+.tc-links { display: flex; flex-direction: column; gap: .1rem; }
+.tc-links a {
+    color: var(--text-2); text-decoration: none; font-size: .8rem;
+    padding: .2rem .45rem; border-radius: 4px;
+    transition: var(--transition);
+    display: flex; align-items: center; gap: .35rem; line-height: 1.35;
+}
+.tc-links a::before { content: '›'; color: var(--brand-light); font-weight: 600; font-size: .85rem; flex-shrink: 0; width: .6rem; }
+.tc-links a:hover { color: var(--brand); background: var(--brand-glow); }
+.tc-divider { height: 1px; background: var(--border); margin: .35rem 0; }
+
+/* ── Fold Controls ── */
+.fold-controls { display: flex; gap: .5rem; margin-bottom: 1.5rem; justify-content: flex-end; }
+.fold-controls button {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: .4rem 1rem; border-radius: var(--radius-xs);
+    font-size: .8rem; font-family: var(--font); cursor: pointer;
+    color: var(--text-2); font-weight: 500; transition: var(--transition);
+}
+.fold-controls button:hover { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+/* ── Part Sections ── */
+.part {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 2rem;
+    overflow: hidden; box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    max-width: 100%;
+}
+.part:hover { box-shadow: var(--shadow-md); }
+.part-header {
+    background: linear-gradient(135deg, var(--brand), #5A3C53);
+    color: #fff; padding: 1.15rem 2rem;
+    font-weight: 600; font-size: 1.05rem; letter-spacing: .02em;
+    word-break: break-word;
+}
+.part-header.ac { background: linear-gradient(135deg, var(--accent), #01696E); }
+.part-content { padding: 1.5rem 2rem; overflow: hidden; }
+
+/* ── Foldable Sections ── */
+details.fold {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 1rem;
+    background: var(--surface);
+    overflow: hidden;
+    transition: var(--transition);
+}
+details.fold:hover { border-color: var(--border-2); }
+details.fold[open] { box-shadow: var(--shadow-sm); }
+details.fold > summary {
+    padding: .9rem 1.25rem;
+    font-weight: 600; font-size: .95rem;
+    color: var(--text);
+    cursor: pointer;
+    list-style: none;
+    display: flex; align-items: center; gap: .5rem;
+    background: var(--surface-2);
+    transition: var(--transition);
+    user-select: none;
+}
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary::before {
+    content: '▸'; font-size: .8rem; color: var(--brand-light);
+    transition: transform .2s; flex-shrink: 0;
+}
+details.fold[open] > summary::before { transform: rotate(90deg); }
+details.fold > summary:hover { background: var(--brand-glow); }
+details.fold[open] > summary { border-bottom: 1px solid var(--border); background: var(--surface); }
+.fold-body { padding: 1.25rem; animation: fadeIn .3s ease; overflow: hidden; overflow-wrap: anywhere; word-break: break-word; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+
+/* ── Step Numbers ── */
+.step {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 1.65rem; height: 1.65rem; border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand), var(--brand-light));
+    color: #fff; font-size: .72rem; font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* ── Code Blocks ── */
+pre {
+    position: relative;
+    background: var(--code-bg);
+    border-radius: var(--radius-sm);
+    margin: 1rem 0;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05), var(--shadow-sm);
+    max-width: 100%;
+}
+pre::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(113,75,103,.3), transparent);
+}
+pre > code {
+    display: block;
+    padding: 1.15rem 1.35rem;
+    font-family: var(--font-mono);
+    font-size: .82rem;
+    line-height: 1.7;
+    color: var(--code-text);
+    overflow-x: auto;
+    white-space: pre;
+    -webkit-overflow-scrolling: touch;
+}
+pre > code::-webkit-scrollbar { height: 6px; }
+pre > code::-webkit-scrollbar-track { background: transparent; }
+pre > code::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 3px; }
+pre > code::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.2); }
+
+/* Code action buttons */
+.code-actions {
+    position: absolute; top: .6rem; right: .6rem;
+    display: flex; gap: .3rem; opacity: 0; transition: opacity .2s;
+}
+pre:hover .code-actions { opacity: 1; }
+.code-btn {
+    display: inline-flex; align-items: center; gap: .3rem;
+    padding: .3rem .6rem; border-radius: 4px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.1);
+    color: rgba(255,255,255,.7); font-family: var(--font-mono);
+    font-size: .68rem; cursor: pointer; transition: var(--transition);
+    backdrop-filter: blur(4px);
+}
+.code-btn:hover { background: rgba(255,255,255,.15); color: #fff; }
+.code-btn svg { width: 12px; height: 12px; }
+
+/* Inline code — overflow safe */
+:not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: .82em;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: .15em .4em;
+    border-radius: 4px;
+    color: var(--brand);
+    font-weight: 500;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    -webkit-hyphens: none;
+    hyphens: none;
+}
+
+/* ── Global overflow safety ── */
+.fold-body, .part-content, .alert, .tip, .ts, td, th {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    min-width: 0;
+}
+.fold-body *, .part-content *, .alert *, .tip *, .ts * {
+    max-width: 100%;
+}
+
+/* ── Tables ── */
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: var(--radius-sm); border: 1px solid var(--border); -webkit-overflow-scrolling: touch; max-width: 100%; }
+table { width: 100%; border-collapse: collapse; font-size: .87rem; table-layout: auto; }
+th {
+    background: var(--surface-2);
+    padding: .7rem 1rem;
+    font-weight: 600; font-size: .8rem;
+    text-align: left; color: var(--text-2);
+    letter-spacing: .02em; text-transform: uppercase;
+    border-bottom: 2px solid var(--border);
+}
+td {
+    padding: .6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(113,75,103,.02); }
+table.checklist td:last-child { text-align: center; font-size: 1.1rem; }
+
+/* ── Alerts ── */
+.alert {
+    padding: 1rem 1.25rem; border-radius: var(--radius-sm);
+    margin: 1rem 0; font-size: .88rem; line-height: 1.7;
+    border-left: 4px solid;
+    overflow: hidden; word-break: break-word; overflow-wrap: anywhere;
+}
+.alert code { word-break: break-all; }
+.alert-info { background: var(--info-bg); border-color: var(--info); color: #1E40AF; }
+.alert-warning { background: var(--warn-bg); border-color: var(--warn); color: #92400E; }
+.alert-error { background: var(--err-bg); border-color: var(--err); color: #991B1B; }
+.alert strong { font-weight: 600; }
+
+/* ── Tips ── */
+.tip {
+    background: linear-gradient(135deg, rgba(1,126,132,.04), rgba(1,126,132,.08));
+    border: 1px solid rgba(1,126,132,.15);
+    border-radius: var(--radius-sm);
+    padding: .85rem 1.15rem .85rem 2.5rem;
+    margin: 1rem 0;
+    font-size: .87rem;
+    color: var(--text-2);
+    line-height: 1.7;
+    position: relative;
+    overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+.tip code { word-break: break-all; }
+.tip::before {
+    content: '💡';
+    position: absolute; left: .85rem; top: .85rem;
+    font-size: 1rem;
+}
+
+/* ── Troubleshoot Items ── */
+.ts {
+    padding: 1rem 1.25rem;
+    margin: .6rem 0;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    border-left: 3px solid var(--brand-light);
+    font-size: .87rem;
+    line-height: 1.7;
+    transition: var(--transition);
+    overflow: hidden; word-break: break-word; overflow-wrap: anywhere;
+}
+.ts code { word-break: break-all; }
+.ts:hover { border-left-color: var(--brand); background: var(--brand-glow); }
+.ts strong {
+    display: block;
+    color: var(--text);
+    margin-bottom: .25rem;
+    font-size: .9rem;
+}
+
+/* ── Typography ── */
+p { margin-bottom: .75rem; }
+h4 {
+    font-size: 1rem; font-weight: 700;
+    color: var(--text);
+    margin: 1.5rem 0 .75rem;
+    padding-bottom: .4rem;
+    border-bottom: 1px solid var(--border);
+}
+strong { font-weight: 600; }
+a { color: var(--brand); text-decoration: none; transition: var(--transition); }
+a:hover { color: var(--accent); }
+
+/* ── Footer ── */
+footer {
+    text-align: center; padding: 3rem 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-3); font-size: .85rem;
+}
+footer strong { color: var(--text-2); }
+footer .footer-line { margin-bottom: .35rem; }
+
+/* ── Edit Modal ── */
+.modal { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+.modal.active { display: flex; }
+.modal-content {
+    background: var(--surface); border-radius: var(--radius);
+    width: 90%; max-width: 700px; max-height: 85vh;
+    box-shadow: var(--shadow-lg); overflow: hidden;
+}
+.modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+}
+.modal-header h3 { font-size: 1rem; font-weight: 600; }
+.modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-3); transition: var(--transition); }
+.modal-close:hover { color: var(--err); }
+.modal-body { padding: 1rem 1.5rem; }
+.modal-body textarea {
+    width: 100%; min-height: 350px; padding: 1rem;
+    font-family: var(--font-mono); font-size: .82rem;
+    background: var(--code-bg); color: var(--code-text);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    resize: vertical; line-height: 1.7;
+}
+.modal-body textarea:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-glow); }
+.modal-footer {
+    display: flex; justify-content: flex-end; gap: .5rem;
+    padding: 1rem 1.5rem; border-top: 1px solid var(--border);
+}
+.modal-btn {
+    padding: .55rem 1.25rem; border-radius: var(--radius-xs);
+    font-family: var(--font); font-size: .85rem; font-weight: 500;
+    cursor: pointer; transition: var(--transition); border: 1px solid var(--border);
+}
+.modal-btn-secondary { background: var(--surface); color: var(--text-2); }
+.modal-btn-secondary:hover { background: var(--surface-2); }
+.modal-btn-primary { background: var(--brand); color: #fff; border-color: var(--brand); }
+.modal-btn-primary:hover { background: var(--brand-light); }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .toc-grid { grid-template-columns: repeat(2, 1fr); }
+    .layout { padding: 1.5rem 1.25rem; }
+    .part-content { padding: 1.25rem; }
+    .hero { padding: 3.5rem 1.5rem 3rem; }
+    .hero h1 { font-size: 2rem; }
+    pre > code { font-size: .78rem; padding: 1rem; }
+}
+@media (max-width: 600px) {
+    .toc-grid { grid-template-columns: 1fr; }
+    .part-header { padding: .9rem 1.25rem; font-size: .95rem; }
+    .fold-body { padding: .85rem; }
+    .hero { padding: 2.5rem 1rem 2rem; }
+    .hero h1 { font-size: 1.6rem; }
+    .hero-tags { gap: .35rem; }
+    .hero-sub { font-size: .88rem; }
+    pre > code { font-size: .72rem; padding: .8rem .9rem; }
+    .ts, .alert, .tip { font-size: .83rem; padding: .85rem 1rem; }
+    .tip { padding-left: 2.2rem; }
+    .layout { padding: 1rem .75rem; }
+    details.fold > summary { font-size: .88rem; padding: .75rem 1rem; }
+    .toc { padding: 1.25rem 1rem; }
+    table { font-size: .78rem; }
+    th, td { padding: .5rem .6rem; }
+    h4 { font-size: .92rem; }
+}
+
+/* ── Print ── */
+@media print {
+    .toc, .code-actions, .modal, .fold-controls, .scroll-progress, .search-wrap { display: none !important; }
+    details.fold { border: none !important; box-shadow: none !important; }
+    details.fold > summary { display: none !important; }
+    details.fold > .fold-body { padding: 0 !important; display: block !important; }
+    details.fold:not([open]) > .fold-body { display: block !important; }
+    .part { break-inside: avoid; }
+    .part-header { break-after: avoid; }
+    pre { white-space: pre-wrap; word-wrap: break-word; }
+    .hero { background: var(--brand) !important; padding: 2rem; }
+    footer { break-before: avoid; }
+}
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<header class="hero">
+    <div class="hero-badge">
+        <span class="dot"></span>
+        Revision · February 2026
+    </div>
+    <h1>Odoo Deployment Guide</h1>
+    <p class="hero-sub">Made with ❤️ by <strong>Emad Felaya</strong> — A complete guide from zero to production</p>
+    <div class="hero-tags">
+        <span class="hero-tag">Ubuntu 24.04 LTS</span>
+        <span class="hero-tag">PostgreSQL 16</span>
+        <span class="hero-tag">Python 3.10+</span>
+        <span class="hero-tag">Nginx + SSL</span>
+        <span class="hero-tag">Enterprise & Community</span>
+        <span class="hero-tag">Version 19.0</span>
+    </div>
+</header>
+
+<!-- Edit Modal -->
+<div class="modal" id="editModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>✏️ Edit Before Copy</h3>
+            <button class="modal-close" onclick="closeEditModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <textarea id="editTextarea" spellcheck="false"></textarea>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn modal-btn-secondary" onclick="closeEditModal()">Cancel</button>
+            <button class="modal-btn modal-btn-primary" onclick="copyEditedCode()">📋 Copy to Clipboard</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ═══ CODE BLOCK ACTIONS ═══
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('pre').forEach(pre => {
+        const code = pre.querySelector('code');
+        if (!code) return;
+        const actions = document.createElement('div');
+        actions.className = 'code-actions';
+        actions.innerHTML = `
+            <button class="code-btn" onclick="copyCode(this.closest('pre').querySelector('code'))" title="Copy">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
+                Copy
+            </button>
+            <button class="code-btn" onclick="openEditModal(this.closest('pre').querySelector('code'))" title="Edit">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke-width="2"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"/></svg>
+                Edit
+            </button>`;
+        pre.appendChild(actions);
+    });
+
+    // Scroll progress
+    window.addEventListener('scroll', () => {
+        const h = document.documentElement.scrollHeight - window.innerHeight;
+        const p = h > 0 ? (window.scrollY / h) * 100 : 0;
+        document.getElementById('scrollProgress').style.width = p + '%';
+    });
+});
+
+function copyCode(codeElement) {
+    const text = codeElement.textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => showCopyFeedback(event));
+    } else {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showCopyFeedback(event);
+    }
+}
+function showCopyFeedback(e) {
+    const btn = e.target.closest('.code-btn');
+    if (!btn) return;
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copied!';
+    btn.style.background = 'rgba(22,163,74,.3)';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
+}
+
+function openEditModal(codeElement) {
+    document.getElementById('editTextarea').value = codeElement.textContent;
+    document.getElementById('editModal').classList.add('active');
+}
+function closeEditModal() {
+    document.getElementById('editModal').classList.remove('active');
+}
+function copyEditedCode() {
+    const textarea = document.getElementById('editTextarea');
+    const text = textarea.value;
+    const done = () => {
+        const btn = document.querySelector('#editModal .modal-btn-primary');
+        const orig = btn.innerHTML;
+        btn.innerHTML = '✓ Copied!'; btn.style.background = 'var(--ok)';
+        setTimeout(() => { closeEditModal(); setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 300); }, 800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done);
+    } else { textarea.select(); document.execCommand('copy'); done(); }
+}
+
+// ═══ SEARCH ═══
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('guide-search');
+    const resultsDiv = document.getElementById('search-results');
+    const tocGrid = document.querySelector('.toc-grid');
+    let searchTimeout, index = null;
+
+    function buildIndex() {
+        const items = [];
+        document.querySelectorAll('details.fold').forEach(detail => {
+            const summary = detail.querySelector('summary');
+            if (!summary) return;
+            const title = summary.textContent.trim();
+            const body = detail.querySelector('.fold-body');
+            if (!body) return;
+            const text = body.textContent;
+            const textLower = text.toLowerCase();
+            const id = detail.id || detail.closest('[id]')?.id || '';
+            const part = detail.closest('article.part');
+            const partHeader = part ? part.querySelector('.part-header') : null;
+            const partName = partHeader ? partHeader.textContent.trim().replace(/^[^\w]*/, '').substring(0, 30) : '';
+            items.push({ title, text, textLower, id, partName, element: detail });
+        });
+        return items;
+    }
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim().toLowerCase();
+        if (query.length < 2) { resultsDiv.style.display = 'none'; tocGrid.style.display = ''; return; }
+        searchTimeout = setTimeout(() => {
+            if (!index) index = buildIndex();
+            const terms = query.split(/\s+/).filter(t => t.length > 1);
+            const matches = [];
+            index.forEach(item => {
+                let score = 0;
+                const titleLower = item.title.toLowerCase();
+                let snippet = '';
+                if (item.textLower.includes(query)) {
+                    score += 100;
+                    const pos = item.textLower.indexOf(query);
+                    const start = Math.max(0, pos - 40);
+                    const end = Math.min(item.text.length, pos + query.length + 60);
+                    snippet = (start > 0 ? '…' : '') + item.text.substring(start, end).trim() + (end < item.text.length ? '…' : '');
+                }
+                if (titleLower.includes(query)) score += 200;
+                if (terms.length > 1) {
+                    const allPresent = terms.every(t => item.textLower.includes(t) || titleLower.includes(t));
+                    if (!allPresent) return;
+                }
+                terms.forEach(term => {
+                    if (titleLower.includes(term)) score += 20;
+                    let pos = 0, count = 0;
+                    while ((pos = item.textLower.indexOf(term, pos)) !== -1 && count < 10) { count++; pos += term.length; }
+                    score += Math.min(count, 5);
+                });
+                if (!snippet && score > 0 && terms.length > 0) {
+                    const pos = item.textLower.indexOf(terms[0]);
+                    if (pos !== -1) {
+                        const start = Math.max(0, pos - 30);
+                        const end = Math.min(item.text.length, pos + terms[0].length + 70);
+                        snippet = (start > 0 ? '…' : '') + item.text.substring(start, end).trim() + (end < item.text.length ? '…' : '');
+                    }
+                }
+                if (score > 0) matches.push({ ...item, score, snippet });
+            });
+            matches.sort((a, b) => b.score - a.score);
+            if (matches.length === 0) {
+                resultsDiv.innerHTML = '<div style="padding:.5rem;color:var(--text-3)">No results found</div>';
+                resultsDiv.style.display = 'block'; tocGrid.style.display = 'none'; return;
+            }
+            const escHtml = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            const html = matches.slice(0, 10).map(m => {
+                const path = m.partName ? `<span class="sr-path">${m.partName}</span>` : '';
+                const snip = m.snippet ? `<div class="sr-snippet">${escHtml(m.snippet)}</div>` : '';
+                return `<a href="#${m.id}" onclick="openSearchResult('${m.id}')">${m.title} ${path}${snip}</a>`;
+            }).join('');
+            resultsDiv.innerHTML = `<div style="padding:.3rem .5rem;color:var(--text-3);font-size:.75rem">${matches.length} result${matches.length > 1 ? 's' : ''}</div>` + html;
+            resultsDiv.style.display = 'block'; tocGrid.style.display = 'none';
+        }, 250);
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') { this.value = ''; this.dispatchEvent(new Event('input')); this.blur(); }
+    });
+});
+
+function openSearchResult(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.tagName === 'DETAILS') el.open = true;
+    let parent = el.closest('details');
+    while (parent) { parent.open = true; parent = parent.parentElement?.closest('details'); }
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    el.style.transition = 'box-shadow .3s';
+    el.style.boxShadow = '0 0 0 3px var(--brand-glow)';
+    setTimeout(() => { el.style.boxShadow = ''; }, 2500);
+}
+</script>
+
+<main class="layout">
+
+<nav class="toc">
+    <div class="toc-top">
+        <h2>Table of Contents</h2>
+        <span class="badge">5 Parts · 39 Sections</span>
+    </div>
+    <div class="search-wrap">
+        <span class="s-icon">🔍</span>
+        <input type="text" id="guide-search" placeholder="Search the guide... (commands, settings, errors)" autocomplete="off">
+    </div>
+    <div id="search-results" class="search-results" style="display:none"></div>
+    <div class="toc-grid">
+
+        <div class="toc-card tc-ov">
+            <div class="tc-head">
+                <span class="tc-icon">⚡</span>
+                <span class="tc-title">Overview</span>
+            </div>
+            <div class="tc-links">
+                <a href="#v19-changes">Odoo 19 Key Changes from v18</a>
+            </div>
+        </div>
+
+        <div class="toc-card tc-1">
+            <div class="tc-head">
+                <span class="tc-icon">🚀</span>
+                <span class="tc-title">Part 1 — Installation</span>
+                <span class="tc-badge">10 STEPS + TUNING</span>
+            </div>
+            <div class="tc-links">
+                <a href="#hw-req">Hardware Requirements</a>
+                <a href="#install">Steps 1–6: System &amp; Source</a>
+                <a href="#step-config">Step 7: Configuration</a>
+                <a href="#step-nginx">Steps 8–10: Service, Nginx, Firewall</a>
+                <a href="#tuning">PostgreSQL Tuning</a>
+                <div class="tc-divider"></div>
+                <a href="#verify">Post-Install Verification</a>
+                <a href="#first-db">First Database Setup</a>
+                <a href="#db-manager">Database Manager (Web UI)</a>
+            </div>
+        </div>
+
+        <div class="toc-card tc-2">
+            <div class="tc-head">
+                <span class="tc-icon">🖥️</span>
+                <span class="tc-title">Part 2 — Multi-Instance</span>
+                <span class="tc-badge">SETUP</span>
+            </div>
+            <div class="tc-links">
+                <a href="#staging">Multi-Instance Overview</a>
+                <a href="#staging-config">Staging / Community / v18</a>
+                <a href="#port-alloc">Port Allocation Table</a>
+            </div>
+        </div>
+
+        <div class="toc-card tc-3">
+            <div class="tc-head">
+                <span class="tc-icon">⚙️</span>
+                <span class="tc-title">Part 3 — Operations</span>
+                <span class="tc-badge">8 TOPICS</span>
+            </div>
+            <div class="tc-links">
+                <a href="#safe-update">Safe Update Procedure</a>
+                <a href="#backups">Automated Backups</a>
+                <a href="#restore">Database Restore</a>
+                <a href="#clone">Database Cloning</a>
+                <a href="#license">Enterprise License</a>
+                <div class="tc-divider"></div>
+                <a href="#service-commands">Service Management</a>
+                <a href="#shell">Odoo Shell Recipes</a>
+                <a href="#commands">Quick Commands</a>
+            </div>
+        </div>
+
+        <div class="toc-card tc-4">
+            <div class="tc-head">
+                <span class="tc-icon">🛠</span>
+                <span class="tc-title">Part 4 — Troubleshooting</span>
+                <span class="tc-badge">4 TOPICS</span>
+            </div>
+            <div class="tc-links">
+                <a href="#troubleshoot">Common Issues</a>
+                <a href="#v19-issues">Odoo 19 Specific Issues</a>
+                <div class="tc-divider"></div>
+                <a href="#diagnostics">Database Diagnostics</a>
+                <a href="#emergency">Emergency Recovery</a>
+            </div>
+        </div>
+
+        <div class="toc-card tc-5">
+            <div class="tc-head">
+                <span class="tc-icon">📚</span>
+                <span class="tc-title">Part 5 — Reference</span>
+                <span class="tc-badge">4 REFS</span>
+            </div>
+            <div class="tc-links">
+                <a href="#config-ref">Configuration Reference</a>
+                <a href="#checklist">Production Checklist</a>
+                <a href="#directory">Directory Structure</a>
+                <a href="#windows">Windows Commands</a>
+            </div>
+        </div>
+
+    </div>
+</nav>
+
+
+<div class="fold-controls">
+    <button onclick="document.querySelectorAll('details.fold').forEach(d=>d.open=true)">▼ Expand All</button>
+    <button onclick="document.querySelectorAll('details.fold').forEach(d=>d.open=false)">▶ Collapse All</button>
+</div>
+
+<!-- ODOO 19 KEY CHANGES -->
+<div class="part" id="v19-changes" style="border-left:4px solid var(--accent)">
+    <header class="part-header ac">⚡ Odoo 19 — Key Changes from v18</header>
+    <div class="part-content">
+        <p style="color:var(--text-2);font-size:.9rem;margin-bottom:1rem">Before installing, know what changed. These affect configuration, custom modules, and daily operations:</p>
+        <div class="table-wrap">
+            <table>
+                <tr><th>Area</th><th>What Changed</th><th>Action Required</th></tr>
+                <tr><td>Network</td><td><code>longpolling_port</code> → <code>gevent_port</code>, <code>xmlrpc_port</code> → <code>http_port</code>, <code>xmlrpc_interface</code> → <code>http_interface</code></td><td>Update odoo.conf parameter names</td></tr>
+                <tr><td>Controllers</td><td><code>type='json'</code> → <code>type='jsonrpc'</code></td><td>Update all custom JSON controllers</td></tr>
+                <tr><td>ORM</td><td><code>name_get()</code> removed, <code>read_group()</code> deprecated</td><td>Use <code>display_name</code> field, <code>_read_group()</code></td></tr>
+                <tr><td>Security</td><td><code>res.groups</code> restructured → privilege-based</td><td>Check custom group references</td></tr>
+                <tr><td>UoM</td><td><code>uom.category</code> model removed</td><td>Update any UoM category references</td></tr>
+                <tr><td>Imports</td><td><code>xlsxwriter</code>, <code>registry</code> import paths changed</td><td>Update import statements</td></tr>
+                <tr><td>Payroll</td><td>Batches renamed to "Pay Runs", work entries use duration</td><td>Review payroll customizations</td></tr>
+                <tr><td>Expenses</td><td>Expense reports removed entirely</td><td>Use list view submit/approve flow</td></tr>
+                <tr><td>API</td><td>New JSON-2 API at <code>/json/2/</code></td><td>Use for new external integrations</td></tr>
+                <tr><td>AI</td><td>Built-in AI agent system (search, fields, server actions)</td><td>Configure in Settings → AI</td></tr>
+                <tr><td>Python API</td><td><code>self._context</code> → <code>self.env.context</code>, <code>self._uid</code> → <code>self.env.uid</code></td><td>Update all custom module references</td></tr>
+                <tr><td>Groups</td><td><code>users</code> → <code>user_ids</code>, <code>groups_id</code> → <code>group_ids</code></td><td>Update field references in code and XML</td></tr>
+                <tr><td>Partners</td><td><code>res.partner.title</code> model removed, <code>mobile</code> field removed from <code>res.partner</code></td><td>Check custom module dependencies</td></tr>
+            </table>
+        </div>
+        <div class="tip">For custom module migration, run <code>grep -rn "name_get\|type='json'\|longpolling_port\|xmlrpc_port\|xmlrpc_interface\|read_group(\|self\._context\|self\._uid\|_apply_ir_rules\|category_id\|\.users\b" /opt/odoo/custom-addons/</code> to find code that needs updating.</div>
+        <div class="alert alert-error" style="margin-top:1.25rem"><strong>⚠️ CRITICAL: PostgreSQL 13.0+ Required</strong><br>Odoo 19 will NOT work with PostgreSQL 12 or earlier due to enhanced JSONB operations. Verify your version before installation: <code>psql --version</code>. This guide installs PostgreSQL 16 (recommended).</div>
+    </div>
+</div>
+
+<!-- ═══════════════════ PART 1 ═══════════════════ -->
+<article class="part" id="install">
+    <header class="part-header">🚀 Part 1: Installation</header>
+    <div class="part-content">
+
+        <details class="fold" open id="hw-req">
+            <summary>Hardware Requirements</summary>
+            <div class="fold-body">
+            <p>Odoo uses a multi-process architecture. Each <strong>worker</strong> is a separate OS process handling HTTP requests (~150–300 MB RAM each). The formula <code>(CPU × 2) + 1</code> optimizes for I/O-bound workloads where workers spend most time waiting on database queries.</p>
+            <div class="table-wrap">
+                <table>
+                    <tr><th>Scale</th><th>Active Users</th><th>~Concurrent</th><th>CPU</th><th>RAM</th><th>Storage</th><th>Workers</th></tr>
+                    <tr><td>Small</td><td>1–50</td><td>~8</td><td>2 cores</td><td>4 GB</td><td>128 GB SSD</td><td>5</td></tr>
+                    <tr><td>Medium</td><td>50–200</td><td>~30</td><td>4 cores</td><td>8 GB</td><td>256 GB SSD</td><td>9</td></tr>
+                    <tr><td>Large</td><td>200–500</td><td>~75</td><td>8 cores</td><td>16 GB</td><td>512 GB NVMe</td><td>17</td></tr>
+                    <tr><td>Enterprise</td><td>500+</td><td>100+</td><td>16+ cores</td><td>32+ GB</td><td>1+ TB NVMe</td><td>33+</td></tr>
+                </table>
+            </div>
+            <p><strong>Active users</strong> = accounts with login access (billed by Odoo). <strong>Concurrent</strong> = users making requests at the same moment (typically 10–15% of active). Each worker serves ~6 concurrent users, so 17 workers handle ~100 simultaneous sessions.</p>
+            <p><strong>Storage planning:</strong> Database grows ~1–2 GB per 10K records. Filestore (attachments/images) depends on usage. Reserve 3–7× DB size for backup retention.</p>
+            <p><strong>Memory formula:</strong> Base Odoo ~1GB + (~200MB × workers) + PostgreSQL shared_buffers (25% RAM). Example for 16GB server: 1GB base + 3.4GB (17 workers) + 4GB PostgreSQL = ~8.4GB, leaving headroom for OS cache.</p>
+            </div>
+        </details>
+
+
+        <details class="fold" open>
+            <summary><span class="step">1</span> System Preparation</summary>
+            <div class="fold-body">
+            <p>Start with a clean Ubuntu 24.04 LTS. Proper locale prevents PostgreSQL collation issues with Arabic/multilingual data.</p>
+            <pre><code># Update all packages
+sudo apt update && sudo apt upgrade -y
+
+# Set locale (critical for PostgreSQL text sorting)
+sudo localectl set-locale LANG=en_US.UTF-8
+sudo timedatectl set-timezone Africa/Cairo
+
+# Essential tools
+sudo apt install -y git curl wget nano htop iotop net-tools \
+    ufw fail2ban unzip software-properties-common</code></pre>
+            <div class="tip"><code>htop</code> monitors CPU/RAM per process, <code>iotop</code> shows disk I/O — essential for diagnosing slow workers.</div>
+            </div>
+        </details>
+
+
+        <details class="fold" open>
+            <summary><span class="step">2</span> PostgreSQL 16</summary>
+            <div class="fold-body">
+            <p>Odoo 19 <strong>requires PostgreSQL 13.0+ minimum</strong> (v16 recommended) for JSONB operations and query optimizations introduced in PostgreSQL 13+. The <code>odoo</code> user gets <code>CREATEDB</code> only — no superuser access (least privilege).</p>
+            <pre><code>sudo apt install -y postgresql-16 postgresql-client-16 postgresql-contrib-16 \
+    postgresql-16-pgvector    # Required for Odoo 19 AI features (vector embeddings)
+sudo systemctl enable --now postgresql
+
+# Create database user (createdb only, no superuser)
+sudo -u postgres createuser --createdb --no-createrole --no-superuser odoo
+
+# Install extensions in template1 (inherited by all new databases automatically)
+# Then transfer ownership to odoo so it can ALTER FUNCTION at startup without superuser
+sudo -u postgres psql -d template1 -c "CREATE EXTENSION IF NOT EXISTS unaccent;"
+sudo -u postgres psql -d template1 -c "ALTER FUNCTION unaccent(text) OWNER TO odoo;"
+sudo -u postgres psql -d template1 -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+# Verify
+sudo -u postgres psql -c "\du" | grep odoo
+sudo -u postgres psql -c "SELECT version();"</code></pre>
+            <div class="tip"><strong>pgvector</strong> is a PostgreSQL extension for vector similarity search. Odoo 19 uses it for AI embeddings (<code>ai_embedding</code> table). Without it, database restores will fail with <code>extension "vector" is not available</code> errors.</div>
+            </div>
+        </details>
+
+
+        <details class="fold" open>
+            <summary><span class="step">3</span> System Dependencies</summary>
+            <div class="fold-body">
+            <p>Odoo compiles Python C extensions for XML parsing, image processing, LDAP authentication, and PDF generation. The patched wkhtmltopdf is a frequent source of issues — never skip it.</p>
+            <pre><code># Python build + library dependencies
+sudo apt install -y python3-pip python3-dev python3-venv python3-wheel \
+    build-essential libssl-dev libffi-dev \
+    libxml2-dev libxslt1-dev libldap2-dev libsasl2-dev libpq-dev \
+    libjpeg-dev libfreetype6-dev zlib1g-dev libcups2-dev \
+    nodejs npm node-less \
+    xfonts-75dpi xfonts-base fontconfig fonts-dejavu fonts-liberation
+
+# Patched wkhtmltopdf (REQUIRED for PDF headers/footers/page numbers)
+# Note: The Jammy (22.04) package works on Noble (24.04) via backward compat.
+# If dependency errors occur, install with: sudo dpkg -i --force-depends ... && sudo apt -f install
+cd /tmp
+wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.jammy_amd64.deb
+sudo apt install -y ./wkhtmltox_0.12.6.1-3.jammy_amd64.deb
+rm wkhtmltox_0.12.6.1-3.jammy_amd64.deb
+wkhtmltopdf --version  # Must show 0.12.6.1 with patched qt
+
+# Create Odoo system user (required for both Community and Enterprise)
+sudo useradd -m -d /opt/odoo -U -r -s /bin/bash odoo</code></pre>
+            <div class="alert alert-warning"><strong>Common mistake:</strong> <code>apt install wkhtmltopdf</code> installs an unpatched build — PDF reports will be missing headers, footers, and page numbers. Always use the GitHub release.</div>
+            </div>
+        </details>
+
+
+        <details class="fold" open>
+            <summary><span class="step">4</span> GitHub SSH Access <span style="background:var(--accent);color:#fff;padding:.15rem .5rem;border-radius:4px;font-size:.75rem;vertical-align:middle">Enterprise Only</span></summary>
+            <div class="fold-body">
+            <p>Enterprise repository is private. Your GitHub account must be linked to an active Odoo subscription. <strong>Community-only installations: skip this step entirely</strong> — go straight to Step 5.</p>
+            <pre><code># Generate Ed25519 key (stronger + shorter than RSA)
+sudo -u odoo ssh-keygen -t ed25519 -C "odoo@$(hostname)" -f /opt/odoo/.ssh/id_ed25519 -N ""
+
+# Display public key — add this to GitHub → Settings → SSH Keys
+sudo cat /opt/odoo/.ssh/id_ed25519.pub
+
+# Test connection (accept host key automatically)
+sudo -u odoo ssh -T git@github.com -o StrictHostKeyChecking=accept-new
+# Expected: "Hi username! You've successfully authenticated..."</code></pre>
+            </div>
+        </details>
+
+
+        <details class="fold" open>
+            <summary><span class="step">5</span> Clone Source Code</summary>
+            <div class="fold-body">
+            <p><code>--depth 1</code> clones only the latest commit, saving ~2 GB of git history. Choose <strong>Community</strong> (free, LGPL) or <strong>Enterprise</strong> (paid subscription, includes Community).</p>
+            <pre><code># Create directory structure
+sudo mkdir -p /opt/odoo/{custom-addons,odoo-server,enterprise,backups,scripts}
+sudo chown -R odoo:odoo /opt/odoo
+touch /opt/odoo/custom-addons/__init__.py
+
+sudo su - odoo
+
+# ═══ Community (public — always required for both editions) ═══
+git clone https://github.com/odoo/odoo.git --depth 1 --branch 19.0 /opt/odoo/odoo-server
+
+# ═══ Enterprise (private — requires SSH key + active subscription) ═══
+# Skip this line for Community-only installations
+git clone git@github.com:odoo/enterprise.git --depth 1 --branch 19.0 /opt/odoo/enterprise
+
+# Verify
+ls /opt/odoo/odoo-server/odoo-bin && echo "Community OK"
+ls /opt/odoo/enterprise/web_enterprise 2>/dev/null && echo "Enterprise OK" || echo "Community-only (no enterprise)"
+
+exit</code></pre>
+            <div class="alert alert-info"><strong>Community vs Enterprise:</strong> Community includes CRM, Sales, Inventory, Manufacturing, Accounting, Website, and many more — fully functional. Enterprise adds Studio, multi-company, payroll localization, quality control, planning, helpdesk, and additional themes. Both use the same Community codebase as the foundation.</div>
+            </div>
+        </details>
+
+
+        <details class="fold" open>
+            <summary><span class="step">6</span> Python Virtual Environment</summary>
+            <div class="fold-body">
+            <p>Virtual environments isolate Odoo's dependencies from the system Python, preventing conflicts during OS upgrades and making rollbacks simple.</p>
+            <pre><code>sudo -u odoo python3 -m venv /opt/odoo/odoo-venv
+
+sudo su - odoo
+source /opt/odoo/odoo-venv/bin/activate
+
+pip install --upgrade pip wheel setuptools
+pip install -r /opt/odoo/odoo-server/requirements.txt
+
+# Recommended extras
+pip install watchdog       # Auto-reload during development
+pip install phonenumbers   # Phone number formatting
+pip install num2words      # Amount in words on invoices
+pip install pyopenssl      # SSL support
+pip install python-barcode # Barcode generation
+
+# Verify key dependencies are installed
+python -c "import lxml, PIL, psycopg2, babel, dateutil; print('All core dependencies OK')"
+
+deactivate && exit</code></pre>
+            </div>
+        </details>
+
+
+        <details class="fold" id="step-config" open>
+            <summary><span class="step">7</span> Configuration</summary>
+            <div class="fold-body">
+            <p>This configuration is production-hardened: single database, no database manager, localhost-only binding (Nginx handles external access), and worker-based multiprocessing.</p>
+            <pre><code>sudo mkdir -p /etc/odoo /var/log/odoo && sudo chown odoo:odoo /var/log/odoo
+
+sudo tee /etc/odoo/odoo.conf > /dev/null << 'EOF'
+[options]
+;; Paths — Enterprise (includes enterprise modules):
+addons_path = /opt/odoo/odoo-server/addons,/opt/odoo/enterprise,/opt/odoo/custom-addons
+;; Community-only (remove enterprise path):
+;addons_path = /opt/odoo/odoo-server/addons,/opt/odoo/custom-addons
+data_dir = /opt/odoo/.local/share/Odoo
+
+;; Database — Unix socket (faster than TCP), single-database mode
+;; db_host, db_port, db_password: omitted = Unix socket (recommended for local PostgreSQL)
+db_user = odoo
+db_name = production_db
+db_maxconn = 32
+list_db = False
+
+;; Security — database manager master password (NOT the admin user login!)
+admin_passwd = CHANGE_THIS_STRONG_PASSWORD
+
+;; Performance — adjust workers to your CPU count
+workers = 17
+max_cron_threads = 2
+limit_memory_hard = 2684354560
+limit_memory_soft = 2147483648
+limit_time_cpu = 600
+limit_time_real = 1200
+limit_request = 8192
+
+;; Network — bind to localhost only, Nginx handles external
+http_port = 8069
+gevent_port = 8072
+http_interface = 127.0.0.1
+proxy_mode = True
+
+;; Logging
+logfile = /var/log/odoo/odoo.log
+log_level = warn
+log_handler = :WARNING,odoo.http:WARNING,werkzeug:WARNING
+
+;; ════════════════════════════════════════════════════════════
+;; Odoo 19 Specific Settings
+;; ════════════════════════════════════════════════════════════
+
+;; Database Configuration (v19 optimized)
+db_template = template0
+unaccent = True
+
+;; OPTIONAL: AI Features (uncomment if using Odoo AI)
+;ai_provider = openai
+;ai_api_key = your_api_key_here
+
+;; OPTIONAL: ESG Module (uncomment if using sustainability tracking)
+;esg_emission_factor_db = ademe
+EOF
+
+sudo chown odoo:odoo /etc/odoo/odoo.conf && sudo chmod 640 /etc/odoo/odoo.conf
+
+# ── Hash the admin_passwd (replace MySecurePassword with your password) ──
+HASHED=$(sudo -u odoo /opt/odoo/odoo-venv/bin/python3 -c "
+from passlib.context import CryptContext
+print(CryptContext(schemes=['pbkdf2_sha512']).hash('MySecurePassword'))
+")
+sudo sed -i "s|^admin_passwd = .*|admin_passwd = $HASHED|" /etc/odoo/odoo.conf
+echo "Password hashed and saved to odoo.conf"</code></pre>
+            <div class="alert alert-info"><strong>Odoo 19:</strong> Use <code>http_port</code> (not <code>xmlrpc_port</code>), <code>http_interface</code> (not <code>xmlrpc_interface</code>), and <code>gevent_port</code> (not <code>longpolling_port</code>). The old parameter names are silently ignored.</div>
+            <div class="tip"><strong>Session security:</strong> Secure cookies (SameSite, Secure flag) are handled at the Nginx/proxy level via HTTPS, not in odoo.conf. JSON-RPC is always enabled on the main HTTP port — no separate config needed.</div>
+            <div class="tip"><strong>Community-only?</strong> Comment out the Enterprise <code>addons_path</code> line and uncomment the Community-only line. That's the only change needed — everything else (workers, ports, logging) stays the same.</div>
+            </div>
+        </details>
+
+
+        <details class="fold" open>
+            <summary><span class="step">8</span> Systemd Service</summary>
+            <div class="fold-body">
+            <p>Systemd handles automatic startup, crash recovery (RestartSec=5), and process supervision. <code>PrivateTmp</code> and <code>NoNewPrivileges</code> add security hardening. For Community-only, change the Description to "Odoo 19 Community".</p>
+            <pre><code>sudo tee /etc/systemd/system/odoo.service > /dev/null << 'EOF'
+[Unit]
+Description=Odoo 19 Enterprise
+Documentation=https://www.odoo.com/documentation/19.0/
+Requires=postgresql.service
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+SyslogIdentifier=odoo
+User=odoo
+Group=odoo
+ExecStart=/opt/odoo/odoo-venv/bin/python3 /opt/odoo/odoo-server/odoo-bin -c /etc/odoo/odoo.conf
+WorkingDirectory=/opt/odoo/odoo-server
+StandardOutput=journal+console
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload && sudo systemctl enable --now odoo
+sudo systemctl status odoo</code></pre>
+
+            
+
+            <h4>Service File Explanation</h4>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Directive</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>Requires=postgresql.service</code></td>
+                            <td>Ensures PostgreSQL is running before starting Odoo</td>
+                        </tr>
+                        <tr>
+                            <td><code>After=network.target</code></td>
+                            <td>Starts after network target is reached</td>
+                        </tr>
+                        <tr>
+                            <td><code>Restart=on-failure</code></td>
+                            <td>Auto-restart if service crashes</td>
+                        </tr>
+                        <tr>
+                            <td><code>RestartSec=5</code></td>
+                            <td>Wait 5 seconds before restarting</td>
+                        </tr>
+                        <tr>
+                            <td><code>NoNewPrivileges=true</code></td>
+                            <td>Security: prevents privilege escalation</td>
+                        </tr>
+                        <tr>
+                            <td><code>PrivateTmp=true</code></td>
+                            <td>Security: isolated /tmp directory</td>
+                        </tr>
+                        <tr>
+                            <td><code>ProtectSystem=full</code></td>
+                            <td>Security: read-only /usr and /boot</td>
+                        </tr>
+                        <tr>
+                            <td><code>ProtectHome=read-only</code></td>
+                            <td>Security: read-only access to home directories</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </details>
+
+
+        <details class="fold" id="step-nginx" open>
+            <summary><span class="step">9</span> Nginx + SSL</summary>
+            <div class="fold-body">
+            <p>Nginx serves as reverse proxy, SSL terminator, and static file cache. It also enforces upload limits and timeouts for large imports.</p>
+            <pre><code>sudo apt install -y nginx
+
+sudo tee /etc/nginx/sites-available/odoo > /dev/null << 'EOF'
+upstream odoo { server 127.0.0.1:8069 fail_timeout=0; }
+upstream odoochat { server 127.0.0.1:8072 fail_timeout=0; }
+
+server {
+    listen 80;
+    server_name erp.example.com;
+
+    client_max_body_size 200M;   # Allow large file uploads
+    proxy_read_timeout 720s;     # Long reports/exports
+    proxy_connect_timeout 720s;
+    proxy_send_timeout 720s;
+
+    # Pass real client info to Odoo
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # Main application
+    location / { proxy_pass http://odoo; proxy_redirect off; }
+
+    # Longpolling/WebSocket for real-time notifications
+    # Odoo 19: /websocket is primary; /longpolling kept for backward compatibility
+    location /longpolling { proxy_pass http://odoochat; }
+
+    # WebSocket (Odoo 19 live features — discuss, notifications, bus)
+    location /websocket {
+        proxy_pass http://odoochat;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    # Cache static assets for 90 days
+    location ~* /web/static/ {
+        proxy_pass http://odoo;
+        expires 90d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Gzip compression
+    gzip on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml image/svg+xml;
+}
+EOF
+
+sudo ln -sf /etc/nginx/sites-available/odoo /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t && sudo systemctl reload nginx
+
+# SSL with Let's Encrypt (auto-configures Nginx for HTTPS)
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d erp.example.com
+sudo certbot renew --dry-run  # Verify auto-renewal works</code></pre>
+            <div class="tip">Certbot modifies your Nginx config to add HTTPS redirect and SSL settings. Certificates auto-renew via systemd timer — no cron needed.</div>
+            </div>
+        </details>
+
+
+        <details class="fold" open>
+            <summary><span class="step">10</span> Firewall &amp; Fail2ban</summary>
+            <div class="fold-body">
+            <p>Block direct Odoo access — all traffic must flow through Nginx for SSL encryption and access logging.</p>
+            <pre><code># Enable firewall
+sudo ufw enable
+sudo ufw allow 22/tcp comment 'SSH'
+sudo ufw allow 80/tcp comment 'HTTP'
+sudo ufw allow 443/tcp comment 'HTTPS'
+sudo ufw deny 8069/tcp comment 'Block direct Odoo'
+sudo ufw deny 8072/tcp comment 'Block direct websocket/longpolling'
+sudo ufw status verbose
+
+# Fail2ban: protect against login brute-force
+sudo systemctl enable --now fail2ban
+
+sudo tee /etc/fail2ban/filter.d/odoo.conf > /dev/null << 'EOF'
+[Definition]
+failregex = Login failed for db:.* login:.* from <HOST>
+ignoreregex =
+EOF
+
+sudo tee /etc/fail2ban/jail.d/odoo.conf > /dev/null << 'EOF'
+[odoo]
+enabled = true
+port = http,https
+filter = odoo
+logpath = /var/log/odoo/odoo.log
+maxretry = 5
+bantime = 3600
+findtime = 600
+EOF
+
+sudo systemctl restart fail2ban</code></pre>
+            </div>
+        </details>
+
+
+        <details class="fold" open id="tuning">
+            <summary>🐘 PostgreSQL Tuning</summary>
+            <div class="fold-body">
+            <p>Default PostgreSQL settings are for a small server with 128MB RAM. Odoo benefits dramatically from proper memory allocation and SSD-optimized settings. <code>jit = off</code> is critical — JIT compilation is designed for analytical queries and actually slows Odoo's transactional workload.</p>
+            <div class="alert alert-error"><strong>⚠️ CRITICAL: Match values to your actual RAM!</strong> Applying settings for a 16GB server on a 2GB machine will crash PostgreSQL with "Cannot allocate memory". Check your RAM first: <code>free -h</code>, then use the matching column from the table below.</div>
+            <pre><code># ═══ Check your RAM first ═══
+free -h
+
+# ═══ Apply settings (ADJUST VALUES to match your RAM — see table below) ═══
+sudo -u postgres psql << 'EOF'
+-- ══ Memory (choose values from the RAM table below) ══
+ALTER SYSTEM SET shared_buffers = '512MB';           -- 25% RAM (example: 2GB server)
+ALTER SYSTEM SET effective_cache_size = '1536MB';    -- 75% RAM
+ALTER SYSTEM SET work_mem = '4MB';                   -- Per-sort operation
+ALTER SYSTEM SET maintenance_work_mem = '128MB';     -- VACUUM, CREATE INDEX
+
+-- ══ WAL & Checkpoints (same for all sizes) ══
+ALTER SYSTEM SET checkpoint_timeout = '15min';
+ALTER SYSTEM SET checkpoint_completion_target = 0.9;
+ALTER SYSTEM SET min_wal_size = '256MB';
+ALTER SYSTEM SET max_wal_size = '1GB';
+
+-- ══ SSD Optimization (same for all sizes) ══
+ALTER SYSTEM SET random_page_cost = 1.1;
+ALTER SYSTEM SET effective_io_concurrency = 200;
+ALTER SYSTEM SET jit = off;
+
+-- ══ Connections ══
+ALTER SYSTEM SET max_connections = 50;               -- Adjust: 50 (2GB) / 100 (8GB) / 150 (16GB+)
+ALTER SYSTEM SET log_min_duration_statement = 1000;  -- Log slow queries (>1s)
+
+-- ══ Odoo 19 Specific ══
+-- V19: Prevent runaway queries
+ALTER SYSTEM SET statement_timeout = '300000';       -- 5 minutes (in milliseconds)
+ALTER SYSTEM SET idle_in_transaction_session_timeout = '600000';  -- 10 minutes
+
+-- V19: Large report/BOM handling (for manufacturing operations)
+ALTER SYSTEM SET temp_file_limit = '5242880';        -- 5GB in KB (adjust for larger servers)
+
+-- V19: Parallel query support (adjust to CPU cores)
+ALTER SYSTEM SET max_parallel_workers_per_gather = 1;  -- 1 (2GB) / 2 (8GB) / 4 (16GB+)
+ALTER SYSTEM SET max_parallel_workers = 2;             -- 2 (2GB) / 4 (8GB) / 8 (16GB+)
+ALTER SYSTEM SET max_parallel_maintenance_workers = 1; -- 1 (2GB) / 2 (8GB) / 4 (16GB+)
+
+-- V19: Egyptian/Arabic locale support
+-- NOTE: lc_* settings are set at initdb time and cannot be changed via ALTER SYSTEM.
+-- Ensure correct locale when creating the PostgreSQL cluster:
+--   sudo pg_createcluster --locale=en_US.UTF-8 16 main
+ALTER SYSTEM SET timezone = 'Africa/Cairo';
+
+SELECT pg_reload_conf();
+EOF
+sudo systemctl restart postgresql</code></pre>
+
+            <h4>Settings by RAM Size</h4>
+            <div class="table-wrap">
+                <table>
+                    <tr><th>Setting</th><th>Purpose</th><th>2GB</th><th>4GB</th><th>8GB</th><th>16GB</th><th>32GB</th><th>64GB</th></tr>
+                    <tr><td>shared_buffers</td><td>25% RAM — PostgreSQL cache</td><td>512MB</td><td>1GB</td><td>2GB</td><td>4GB</td><td>8GB</td><td>16GB</td></tr>
+                    <tr><td>effective_cache_size</td><td>75% RAM — OS + PG cache hint</td><td>1.5GB</td><td>3GB</td><td>6GB</td><td>12GB</td><td>24GB</td><td>48GB</td></tr>
+                    <tr><td>work_mem</td><td>Per-sort/hash operation</td><td>4MB</td><td>8MB</td><td>32MB</td><td>64MB</td><td>128MB</td><td>256MB</td></tr>
+                    <tr><td>maintenance_work_mem</td><td>VACUUM, CREATE INDEX</td><td>128MB</td><td>256MB</td><td>256MB</td><td>512MB</td><td>1GB</td><td>2GB</td></tr>
+                    <tr><td>max_connections</td><td>Total connection slots</td><td>50</td><td>75</td><td>100</td><td>150</td><td>200</td><td>300</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-warning"><strong>Always set <code>jit = off</code></strong> and <code>random_page_cost = 1.1</code> (for SSD). These two settings alone can improve Odoo query performance by 20-40%.</div>
+
+            <h4>Verify Applied Settings</h4>
+            <pre><code>sudo -u postgres psql -c "
+SELECT name, setting, unit FROM pg_settings 
+WHERE name IN ('shared_buffers','effective_cache_size','work_mem','jit','random_page_cost','max_connections','log_min_duration_statement');"</code></pre>
+            </div>
+        </details>
+
+
+        <details class="fold" id="verify" open>
+            <summary>✅ Post-Install Verification</summary>
+            <div class="fold-body">
+            <p>Run these checks to confirm everything is working before going live:</p>
+            <pre><code># 1. All services running
+sudo systemctl status postgresql odoo nginx --no-pager
+
+# 2. Ports listening
+ss -tlnp | grep -E "(5432|8069|8072|80|443)"
+#   5432=PostgreSQL  8069=Odoo  8072=Longpolling  80/443=Nginx
+
+# 3. No errors in Odoo log
+sudo tail -50 /var/log/odoo/odoo.log | grep -iE "(error|critical)"
+
+# 4. HTTP responses
+curl -s -o /dev/null -w "Odoo direct: %{http_code}\n" http://localhost:8069/web/login
+curl -s -o /dev/null -w "Via Nginx:   %{http_code}\n" https://erp.example.com/web/login
+
+# 5. Database size
+sudo -u postgres psql -c "SELECT pg_size_pretty(pg_database_size('production_db'));"
+
+# 6. Worker count
+ps aux | grep "odoo-bin" | grep -v grep | wc -l
+# Should be: workers + 1 (main) + max_cron_threads
+
+# 7. Edition check
+sudo -u postgres psql -d production_db -t -c "SELECT CASE WHEN EXISTS(SELECT 1 FROM ir_module_module WHERE name='web_enterprise' AND state='installed') THEN 'Enterprise' ELSE 'Community' END;"</code></pre>
+            </div>
+        </details>
+
+
+        <details class="fold" id="first-db" open>
+            <summary>🗄️ First Database Setup</summary>
+            <div class="fold-body">
+            <p>After installation, create the production database and install initial modules. The <code>-i</code> flag installs modules. <strong>Odoo 19 no longer loads demo data by default</strong> — the <code>--without-demo</code> flag is included for explicitness and backward compatibility.</p>
+            <pre><code># Create database and install base modules
+sudo systemctl stop odoo
+sudo -u odoo /opt/odoo/odoo-venv/bin/python3 /opt/odoo/odoo-server/odoo-bin \
+    -c /etc/odoo/odoo.conf -d production_db \
+    -i base,web,mail,contacts --without-demo=all --stop-after-init
+
+# Install business modules (example for manufacturing company)
+sudo -u odoo /opt/odoo/odoo-venv/bin/python3 /opt/odoo/odoo-server/odoo-bin \
+    -c /etc/odoo/odoo.conf -d production_db \
+    -i sale_management,purchase,stock,mrp,hr,hr_holidays,account \
+    --stop-after-init
+
+sudo systemctl start odoo</code></pre>
+            <p>After first login (admin/admin), immediately change the admin password via Settings → Users → Administrator.</p>
+            <div class="tip"><strong>Module install order matters.</strong> Install <code>base</code> first, then business modules. If you install all at once with <code>-i</code>, Odoo resolves dependencies automatically, but it's slower than sequential installs for large module sets.</div>
+            </div>
+        </details>
+
+        <details class="fold" id="db-manager">
+            <summary>🗃️ Database Manager (Web UI)</summary>
+            <div class="fold-body">
+            <p>Odoo ships with a web-based Database Manager for creating, duplicating, backing up, and deleting databases through the browser. It's <strong>disabled by default</strong> in this guide for security — enable it only when needed, then disable it again.</p>
+
+            <h4>Enable Database Manager</h4>
+            <p>Two config changes are required:</p>
+            <pre><code># Edit the config for the target instance
+sudo nano /etc/odoo/odoo.conf   # or odoo-community.conf, odoo-staging.conf, etc.
+
+# 1. Change list_db to True
+list_db = True
+
+# 2. Set db_name to False (allows listing all databases)
+db_name = False
+
+# 3. IMPORTANT: Remove or comment out db_host entirely
+#    If db_host is set (even to False), Odoo uses TCP which requires a password.
+#    Without db_host, Odoo uses Unix socket → peer authentication → no password needed.
+; db_host = False
+
+# Restart the service
+sudo systemctl restart odoo          # or odoo-community, odoo-staging, etc.</code></pre>
+
+            <div class="alert alert-warning"><strong>⚠️ db_host pitfall:</strong> If <code>db_host</code> is present in the config (even set to <code>False</code>), Odoo connects via TCP on port 5432, which triggers <code>fe_sendauth: no password supplied</code>. Removing the line entirely forces Unix socket connection with peer authentication — no password needed.</div>
+
+            <p>Access the Database Manager at:</p>
+            <pre><code>https://your-domain.com/web/database/manager</code></pre>
+
+            <h4>Master Password (admin_passwd)</h4>
+            <p>The <code>admin_passwd</code> in odoo.conf protects the Database Manager. <strong>Always hash it</strong> — never store plain text:</p>
+            <pre><code># Generate hashed password
+python3 -c "from passlib.hash import pbkdf2_sha512; print(pbkdf2_sha512.using(rounds=600000).hash('YOUR_STRONG_PASSWORD'))"
+
+# Put the output in odoo.conf:
+# admin_passwd = $pbkdf2-sha512$600000$...</code></pre>
+
+            <h4>Disable After Use</h4>
+            <p>When done, immediately re-secure the instance:</p>
+            <pre><code># Edit config
+sudo nano /etc/odoo/odoo.conf
+
+# Restore production settings:
+list_db = False
+db_name = production_db       # Lock to single database
+; db_host stays removed/commented
+
+# Restart
+sudo systemctl restart odoo</code></pre>
+
+            <div class="alert alert-error"><strong>🔒 Security:</strong> Never leave <code>list_db = True</code> on a production server. Anyone who discovers the URL can see all databases, and with the master password can create, duplicate, or delete databases.</div>
+
+            <div class="tip"><strong>For multi-instance setups</strong> (staging, community, v18), each instance has its own config file. Enable Database Manager per-instance by editing the specific config (<code>/etc/odoo/odoo-community.conf</code>, etc.) and restarting only that service.</div>
+            </div>
+        </details>
+
+    </div>
+</article>
+<article class="part" id="multi-instance">
+    <header class="part-header">🖥️ Part 2: Multi-Instance Setup</header>
+    <div class="part-content">
+
+        <details class="fold" open id="staging">
+            <summary>🖥️ Multi-Instance Setup</summary>
+            <div class="fold-body">
+            <p>Run multiple Odoo instances alongside production on the same server using different ports, data directories, and systemd services. Common scenarios: staging for testing, or a Community edition instance for non-licensed workloads.</p>
+            <pre><code># Create data directories for additional instances
+sudo -u odoo mkdir -p /opt/odoo/.local/share/Odoo-Staging
+sudo -u odoo mkdir -p /opt/odoo/.local/share/Odoo-Community
+sudo -u odoo mkdir -p /opt/odoo/.local/share/Odoo18</code></pre>
+
+            <details class="fold" open id="staging-config">
+                <summary>Staging Instance (Enterprise)</summary>
+                <div class="fold-body">
+            <pre><code>sudo tee /etc/odoo/odoo-staging.conf > /dev/null << 'EOF'
+[options]
+addons_path = /opt/odoo/odoo-server/addons,/opt/odoo/enterprise,/opt/odoo/custom-addons
+data_dir = /opt/odoo/.local/share/Odoo-Staging
+db_name = staging_db
+db_user = odoo
+admin_passwd = STAGING_PASSWORD
+http_port = 8079
+gevent_port = 8082
+http_interface = 127.0.0.1
+proxy_mode = True
+list_db = False
+workers = 2
+max_cron_threads = 1
+limit_memory_hard = 2147483648
+logfile = /var/log/odoo/odoo-staging.log
+log_level = info
+EOF
+sudo chown odoo:odoo /etc/odoo/odoo-staging.conf && sudo chmod 640 /etc/odoo/odoo-staging.conf</code></pre>
+
+                </div>
+            </details>
+
+            <details class="fold" open>
+                <summary>Community Instance (No Enterprise License)</summary>
+                <div class="fold-body">
+            <p>Useful for dev/testing, public-facing websites, or departments that don't need Enterprise modules. Uses the same Community codebase — just exclude the enterprise addons_path.</p>
+            <pre><code>sudo tee /etc/odoo/odoo-community.conf > /dev/null << 'EOF'
+[options]
+;; Community-only: NO enterprise path
+addons_path = /opt/odoo/odoo-server/addons,/opt/odoo/custom-addons
+data_dir = /opt/odoo/.local/share/Odoo-Community
+db_name = community_db
+db_user = odoo
+admin_passwd = COMMUNITY_PASSWORD
+http_port = 8089
+gevent_port = 8092
+http_interface = 127.0.0.1
+proxy_mode = True
+list_db = False
+workers = 2
+max_cron_threads = 1
+limit_memory_hard = 2147483648
+logfile = /var/log/odoo/odoo-community.log
+log_level = info
+EOF
+sudo chown odoo:odoo /etc/odoo/odoo-community.conf && sudo chmod 640 /etc/odoo/odoo-community.conf</code></pre>
+
+                </div>
+            </details>
+
+            <details class="fold" open>
+                <summary>Odoo 18 Instance (Different Version)</summary>
+                <div class="fold-body">
+            <p>Run an older Odoo version alongside v19 — useful for clients still on v18, migration testing, or module compatibility checks. Requires its <strong>own source code and Python venv</strong> since different versions have different dependencies.</p>
+            <pre><code># ── Clone Odoo 18 source (separate directory from v19) ──
+sudo su - odoo
+git clone https://github.com/odoo/odoo.git --depth 1 --branch 18.0 /opt/odoo/odoo18-server
+# Enterprise (if licensed for v18):
+git clone git@github.com:odoo/enterprise.git --depth 1 --branch 18.0 /opt/odoo/enterprise18
+exit
+
+# ── Separate Python venv (v18 has different requirements) ──
+sudo -u odoo python3 -m venv /opt/odoo/odoo18-venv
+sudo -u odoo /opt/odoo/odoo18-venv/bin/pip install --upgrade pip wheel setuptools
+sudo -u odoo /opt/odoo/odoo18-venv/bin/pip install -r /opt/odoo/odoo18-server/requirements.txt</code></pre>
+            <pre><code>sudo tee /etc/odoo/odoo18.conf > /dev/null << 'EOF'
+[options]
+;; Odoo 18 — Enterprise (includes enterprise18 modules):
+addons_path = /opt/odoo/odoo18-server/addons,/opt/odoo/enterprise18,/opt/odoo/custom-addons
+;; Odoo 18 — Community-only:
+;addons_path = /opt/odoo/odoo18-server/addons,/opt/odoo/custom-addons
+data_dir = /opt/odoo/.local/share/Odoo18
+db_name = odoo18_db
+db_user = odoo
+admin_passwd = ODOO18_PASSWORD
+http_port = 8099
+longpolling_port = 8098
+http_interface = 127.0.0.1
+proxy_mode = True
+list_db = False
+workers = 2
+max_cron_threads = 1
+limit_memory_hard = 2147483648
+logfile = /var/log/odoo/odoo18.log
+log_level = info
+EOF
+sudo chown odoo:odoo /etc/odoo/odoo18.conf && sudo chmod 640 /etc/odoo/odoo18.conf</code></pre>
+            <div class="alert alert-info"><strong>v18 uses <code>longpolling_port</code></strong>, not <code>gevent_port</code>. This rename happened in v19. Each version uses its own parameter name.</div>
+
+                </div>
+            </details>
+
+            <details class="fold" open>
+                <summary>Systemd Services (Staging / Community / v18)</summary>
+                <div class="fold-body">
+            <p>Systemd service file for the staging instance:</p>
+            <pre><code>sudo tee /etc/systemd/system/odoo-staging.service > /dev/null << 'EOF'
+[Unit]
+Description=Odoo 19 Staging
+Requires=postgresql.service
+After=network.target postgresql.service
+[Service]
+Type=simple
+User=odoo
+Group=odoo
+ExecStart=/opt/odoo/odoo-venv/bin/python3 /opt/odoo/odoo-server/odoo-bin -c /etc/odoo/odoo-staging.conf
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable odoo-staging
+sudo systemctl start odoo-staging
+sudo systemctl status odoo-staging</code></pre>
+
+            <h4 style="margin-top:2rem">Community Service</h4>
+            <pre><code>sudo tee /etc/systemd/system/odoo-community.service > /dev/null << 'EOF'
+[Unit]
+Description=Odoo 19 Community
+Requires=postgresql.service
+After=network.target postgresql.service
+[Service]
+Type=simple
+User=odoo
+Group=odoo
+ExecStart=/opt/odoo/odoo-venv/bin/python3 /opt/odoo/odoo-server/odoo-bin -c /etc/odoo/odoo-community.conf
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable odoo-community
+sudo systemctl start odoo-community
+sudo systemctl status odoo-community</code></pre>
+
+            <h4 style="margin-top:2rem">Odoo 18 Service</h4>
+            <pre><code>sudo tee /etc/systemd/system/odoo18.service > /dev/null << 'EOF'
+[Unit]
+Description=Odoo 18
+Requires=postgresql.service
+After=network.target postgresql.service
+[Service]
+Type=simple
+User=odoo
+Group=odoo
+ExecStart=/opt/odoo/odoo18-venv/bin/python3 /opt/odoo/odoo18-server/odoo-bin -c /etc/odoo/odoo18.conf
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable odoo18
+sudo systemctl start odoo18
+sudo systemctl status odoo18</code></pre>
+
+                </div>
+            </details>
+
+            <details class="fold" open>
+                <summary>Management Commands &amp; Logs</summary>
+                <div class="fold-body">
+            <pre><code># View logs for specific instance
+sudo journalctl -u odoo-staging -f
+sudo journalctl -u odoo-community -f
+sudo journalctl -u odoo18 -f
+
+# Restart specific instance
+sudo systemctl restart odoo-staging
+
+# Stop all Odoo instances
+sudo systemctl stop odoo odoo-staging odoo-community odoo18
+
+# Check which ports are in use
+sudo netstat -tulpn | grep odoo
+# or
+sudo ss -tulpn | grep odoo</code></pre>
+
+                </div>
+            </details>
+
+            <details class="fold" open>
+                <summary>Nginx Configurations (Staging / Community / v18)</summary>
+                <div class="fold-body">
+            <h4>Staging Nginx</h4>
+            <pre><code>sudo tee /etc/nginx/sites-available/odoo-staging > /dev/null << 'EOF'
+upstream odoo-stg { server 127.0.0.1:8079; }
+upstream odoo-stg-ws { server 127.0.0.1:8082; }
+server {
+    listen 80;
+    server_name staging.example.com;
+    client_max_body_size 200M;
+    proxy_read_timeout 720s;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    location /longpolling { proxy_pass http://odoo-stg-ws; }
+    location /websocket { proxy_pass http://odoo-stg-ws; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; }
+    location / { proxy_pass http://odoo-stg; }
+}
+EOF
+
+sudo ln -sf /etc/nginx/sites-available/odoo-staging /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+
+# Add SSL certificate
+sudo certbot --nginx -d staging.example.com</code></pre>
+
+            <h4>Community Nginx</h4>
+            <pre><code>sudo tee /etc/nginx/sites-available/odoo-community > /dev/null << 'EOF'
+upstream odoo-ce { server 127.0.0.1:8089; }
+upstream odoo-ce-ws { server 127.0.0.1:8092; }
+server {
+    listen 80;
+    server_name community.example.com;
+    client_max_body_size 200M;
+    proxy_read_timeout 720s;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    location /longpolling { proxy_pass http://odoo-ce-ws; }
+    location /websocket { proxy_pass http://odoo-ce-ws; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; }
+    location / { proxy_pass http://odoo-ce; }
+}
+EOF
+
+sudo ln -sf /etc/nginx/sites-available/odoo-community /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+
+# Add SSL certificate
+sudo certbot --nginx -d community.example.com</code></pre>
+
+            <h4>Odoo 18 Nginx</h4>
+            <pre><code>sudo tee /etc/nginx/sites-available/odoo18 > /dev/null << 'EOF'
+upstream odoo18 { server 127.0.0.1:8099; }
+upstream odoo18-lp { server 127.0.0.1:8098; }
+server {
+    listen 80;
+    server_name v18.example.com;
+    client_max_body_size 200M;
+    proxy_read_timeout 720s;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    location /longpolling { proxy_pass http://odoo18-lp; }
+    location /websocket { proxy_pass http://odoo18-lp; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; }
+    location / { proxy_pass http://odoo18; }
+}
+EOF
+
+sudo ln -sf /etc/nginx/sites-available/odoo18 /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+
+# Add SSL certificate
+sudo certbot --nginx -d v18.example.com</code></pre>
+
+                </div>
+            </details>
+
+            <details class="fold" open>
+                <summary>Initialize Databases &amp; Verify</summary>
+                <div class="fold-body">
+            <h4>Initialize Community Database</h4>
+            <pre><code># Create and initialize Community database
+sudo -u postgres createdb -O odoo community_db
+sudo systemctl stop odoo-community
+sudo -u odoo /opt/odoo/odoo-venv/bin/python3 /opt/odoo/odoo-server/odoo-bin \
+    -c /etc/odoo/odoo-community.conf -d community_db \
+    --no-http \
+    -i base,web,mail,contacts --without-demo=all --stop-after-init
+sudo systemctl start odoo-community</code></pre>
+
+            <h4>Initialize Odoo 18 Database</h4>
+            <pre><code># Create and initialize Odoo 18 database (uses its own venv + source)
+sudo -u postgres createdb -O odoo odoo18_db
+sudo systemctl stop odoo18
+sudo -u odoo /opt/odoo/odoo18-venv/bin/python3 /opt/odoo/odoo18-server/odoo-bin \
+    -c /etc/odoo/odoo18.conf -d odoo18_db \
+    --no-http \
+    -i base,web,mail,contacts --without-demo=all --stop-after-init
+sudo systemctl start odoo18</code></pre>
+
+            <h4>Verify All Instances</h4>
+            <pre><code>for svc in odoo odoo-staging odoo-community odoo18; do
+    echo -n "$svc: "; systemctl is-active $svc
+done</code></pre>
+
+            <h4 id="port-alloc">Port Allocation</h4>
+            <div class="table-wrap">
+                <table>
+                    <tr><th>Instance</th><th>Edition</th><th>Version</th><th>HTTP</th><th>Gevent/LP</th><th>Workers</th><th>Domain</th></tr>
+                    <tr><td>Production</td><td>Enterprise</td><td>19.0</td><td>8069</td><td>8072</td><td>17</td><td>erp.example.com</td></tr>
+                    <tr><td>Staging</td><td>Enterprise</td><td>19.0</td><td>8079</td><td>8082</td><td>2</td><td>staging.example.com</td></tr>
+                    <tr><td>Community</td><td>Community</td><td>19.0</td><td>8089</td><td>8092</td><td>2</td><td>community.example.com</td></tr>
+                    <tr><td>Odoo 18</td><td>Enterprise/CE</td><td>18.0</td><td>8099</td><td>8098</td><td>2</td><td>v18.example.com</td></tr>
+                </table>
+            </div>
+            <div class="tip">v19 instances (production, staging, community) share the same codebase and Python venv — only config, data directories, and ports differ. The Odoo 18 instance has its <strong>own source and venv</strong> since different versions have different dependencies. Each is an independent service.</div>
+                </div>
+            </details>
+
+            </div>
+        </details>
+
+
+    </div>
+</article>
+
+<!-- ═══════════════════ PART 3 ═══════════════════ -->
+<article class="part" id="operations">
+    <header class="part-header">⚙️ Part 3: Operations</header>
+    <div class="part-content">
+
+        <details class="fold" open id="safe-update">
+            <summary>🔒 Safe Update Procedure</summary>
+
+            <div class="fold-body">
+            <p>Always: backup → stop → fetch → update schema → clear cache → start. Test on staging first when possible.</p>
+
+            <h4>Standard Update (GitHub Clone)</h4>
+            <pre><code># 1. Backup (MANDATORY before any update)
+cd /tmp && sudo -u odoo /opt/odoo/scripts/backup.sh
+
+# 2. Stop service
+sudo systemctl stop odoo
+
+# 3. Fix Git ownership (first time only, or after manual git operations as root)
+sudo chown -R odoo:odoo /opt/odoo/odoo-server
+sudo chown -R odoo:odoo /opt/odoo/enterprise
+
+# 4. Fetch and rebase (official Odoo-recommended method)
+#    --autostash preserves any local changes you made to source files
+cd /opt/odoo/odoo-server && sudo -u odoo git fetch && sudo -u odoo git rebase --autostash
+cd /opt/odoo/enterprise && sudo -u odoo git fetch && sudo -u odoo git rebase --autostash  # Skip for Community-only
+
+# 5. Update pip deps (if requirements.txt changed)
+sudo -u odoo /opt/odoo/odoo-venv/bin/pip install -r /opt/odoo/odoo-server/requirements.txt
+
+# 6. Update schema (base only — safe for production)
+sudo -u odoo /opt/odoo/odoo-venv/bin/python3 /opt/odoo/odoo-server/odoo-bin \
+    -c /etc/odoo/odoo.conf -d production_db -u base --stop-after-init
+# If specific modules changed: -u base,mrp,sale (check git log for affected modules)
+
+# 7. Clear cached assets
+sudo -u postgres psql -d production_db -c "DELETE FROM ir_attachment WHERE name LIKE '%/web/assets/%';"
+
+# 8. Start and verify
+sudo systemctl start odoo
+sudo systemctl status odoo
+
+# 9. Check recent commits (ALWAYS use 'sudo -u odoo')
+cd /opt/odoo/odoo-server && sudo -u odoo git log -5 --oneline origin/19.0
+cd /opt/odoo/enterprise && sudo -u odoo git log -5 --oneline origin/19.0</code></pre>
+
+            <h4>Handling Conflicts</h4>
+            <p>If <code>git rebase --autostash</code> reports source code conflicts (because you edited Odoo source files locally), you have two options:</p>
+            <pre><code># Option A: Resolve conflicts manually
+#   Git will list the conflicting files. Edit each file,
+#   choose which version to keep, then:
+cd /opt/odoo/odoo-server
+sudo -u odoo git add .
+sudo -u odoo git rebase --continue
+
+# Option B: Discard local changes and use official version
+cd /opt/odoo/odoo-server && sudo -u odoo git reset --hard origin/19.0
+cd /opt/odoo/enterprise && sudo -u odoo git reset --hard origin/19.0</code></pre>
+            <div class="tip"><strong>Avoid editing Odoo source files directly.</strong> Use custom modules with <code>_inherit</code> to override behavior. This eliminates merge conflicts entirely during updates.</div>
+
+            <div class="alert alert-warning"><strong>Git Operations Best Practice:</strong> ALWAYS run git commands as odoo user (<code>sudo -u odoo git ...</code>) to avoid ownership conflicts. Running git as root causes "dubious ownership" errors. The <code>chown</code> in step 3 fixes existing ownership issues, but consistent use of <code>sudo -u odoo</code> prevents future problems.</div>
+            <div class="alert alert-error"><strong>Never use <code>-u all</code></strong> — updates every module sequentially, takes hours, and a failure mid-way leaves the database in an inconsistent state requiring restore from backup.</div>
+            </div>
+        </details>
+
+
+        <details class="fold" id="backups" open>
+            <summary>💾 Automated Backups</summary>
+            <div class="fold-body">
+            <p>A complete Odoo backup has <strong>two parts</strong>: the PostgreSQL database (all records, settings, users) and the filestore (uploaded files, images, attachments). Both are required for a full restore.</p>
+            <pre><code>sudo mkdir -p /opt/odoo/backups && sudo chown odoo:odoo /opt/odoo/backups
+sudo mkdir -p /opt/odoo/scripts && sudo chown odoo:odoo /opt/odoo/scripts
+
+sudo tee /opt/odoo/scripts/backup.sh > /dev/null << 'EOF'
+#!/bin/bash
+set -e
+DB="${1:-production_db}"
+DIR="/opt/odoo/backups"
+FS="/opt/odoo/.local/share/Odoo/filestore/$DB"
+DATE=$(date +%Y%m%d_%H%M%S)
+KEEP=3
+
+echo "[$(date)] Backup starting: $DB"
+
+# Database (custom format = compressed + selective restore)
+pg_dump -Fc "$DB" > "$DIR/${DB}_${DATE}.dump"
+
+# Filestore
+[ -d "$FS" ] && tar -czf "$DIR/${DB}_fs_${DATE}.tar.gz" -C "$(dirname $FS)" "$(basename $FS)"
+
+# Retention
+find "$DIR" -type f -name "${DB}_*" -mtime +$KEEP -delete
+
+# Report
+echo "[$(date)] Done: $(du -h "$DIR/${DB}_${DATE}.dump" | cut -f1) DB, $(du -h "$DIR/${DB}_fs_${DATE}.tar.gz" 2>/dev/null | cut -f1 || echo 'N/A') filestore"
+EOF
+
+sudo chmod +x /opt/odoo/scripts/backup.sh && sudo chown odoo:odoo /opt/odoo/scripts/backup.sh
+
+# Daily backup at 2 AM
+echo -e "0 2 * * * odoo cd /tmp && /opt/odoo/scripts/backup.sh >> /var/log/odoo/backup.log 2>&1
+" | sudo tee /etc/cron.d/odoo-backup
+
+# Test now (run from /tmp to avoid permission warnings)
+cd /tmp && sudo -u odoo /opt/odoo/scripts/backup.sh
+
+# Verify backup files
+ls -lh /opt/odoo/backups/</code></pre>
+            
+            <div class="alert alert-info"><strong>Important:</strong> Always run backup scripts from a directory accessible to the <code>odoo</code> user (like <code>/tmp</code>) to avoid "Permission denied" warnings when the script tries to restore the working directory. The backup completes successfully either way, but running from <code>/tmp</code> eliminates unnecessary warnings.</div>
+
+            <h4>Offsite Backup</h4>
+            <p>Always keep backups on a separate server. If the production disk fails, local backups are lost too.</p>
+            <pre><code># Sync to remote server daily (add to crontab)
+rsync -avz --delete /opt/odoo/backups/ backup@remote:/backups/odoo/
+
+# Or use rclone for S3/GCS cloud storage
+rclone sync /opt/odoo/backups remote:odoo-backups --transfers 4</code></pre>
+
+            <h4>Verify Backup Integrity</h4>
+            <p>Backups that can't be restored are useless. Schedule monthly restore tests:</p>
+            <pre><code># Quick integrity check (validates dump format without restoring)
+sudo cat /opt/odoo/backups/production_db_LATEST.dump | pg_restore -l > /dev/null && echo "Dump OK" || echo "CORRUPT"
+
+# Full restore test to a temporary database
+sudo -u postgres createdb -O odoo test_restore
+sudo cat /opt/odoo/backups/production_db_LATEST.dump | sudo -u postgres pg_restore -d test_restore
+sudo -u postgres psql -d test_restore -c "SELECT count(*) FROM res_users;"  # Sanity check
+sudo -u postgres dropdb test_restore</code></pre>
+
+            </div>
+        </details>
+
+
+        <details class="fold" id="restore" open>
+            <summary>🔄 Database Restore</summary>
+            <div class="fold-body">
+            <p>A full Odoo restore requires <strong>two parts</strong>: the PostgreSQL database dump and the filestore (uploaded files, images, attachments). Missing either part results in broken images or lost data.</p>
+
+            <h4>Restore on Same Server</h4>
+            <p>Use this when you need to roll back production to a previous backup, or recover from a failed update:</p>
+            <pre><code># 1. Stop Odoo
+sudo systemctl stop odoo
+
+# 2. List available backups
+ls -lh /opt/odoo/backups/
+
+# 3. Drop and recreate the database
+sudo -u postgres dropdb --if-exists production_db
+sudo -u postgres createdb -O odoo production_db
+
+# 4. Restore database (pipe method — avoids all permission issues)
+sudo cat /opt/odoo/backups/production_db_YYYYMMDD.dump \
+    | sudo -u postgres pg_restore -d production_db
+
+# For faster restore on multi-core systems (4 parallel jobs):
+sudo cat /opt/odoo/backups/production_db_YYYYMMDD.dump \
+    | sudo -u postgres pg_restore -j 4 -d production_db
+
+# 5. Restore filestore
+sudo -u odoo rm -rf /opt/odoo/.local/share/Odoo/filestore/production_db
+sudo -u odoo tar -xzf /opt/odoo/backups/production_db_fs_YYYYMMDD.tar.gz \
+    -C /opt/odoo/.local/share/Odoo/filestore/
+
+# 6. Clear cached assets (forces regeneration)
+sudo -u postgres psql -d production_db \
+    -c "DELETE FROM ir_attachment WHERE name LIKE '%/web/assets/%';"
+
+# 7. Start and verify
+sudo systemctl start odoo
+sudo systemctl status odoo</code></pre>
+
+            <div class="alert alert-info"><strong>Why pipe method?</strong> Using <code>sudo cat backup.dump | sudo -u postgres pg_restore</code> bypasses all file permission issues. Root reads the file and pipes it to postgres — no "Permission denied" errors.</div>
+
+            <div class="alert alert-warning"><strong>pgvector required:</strong> Odoo 19 databases contain AI embedding data that requires the <code>pgvector</code> extension. If you see <code>extension "vector" is not available</code> during restore, install it first: <code>sudo apt install postgresql-16-pgvector</code> — this is a PostgreSQL system extension, not a Python package.</div>
+
+            <h4>Restore on Different Server</h4>
+            <p>Use this when migrating to a new server, or setting up a disaster recovery copy. The target server must have Odoo and PostgreSQL already installed.</p>
+            <pre><code># ── On the SOURCE server: Transfer backup files ──
+
+# Option A: Direct SCP transfer
+scp /opt/odoo/backups/production_db_YYYYMMDD.dump user@NEW_SERVER:/tmp/
+scp /opt/odoo/backups/production_db_fs_YYYYMMDD.tar.gz user@NEW_SERVER:/tmp/
+
+# Option B: rsync (better for large files, supports resume)
+rsync -avzP /opt/odoo/backups/production_db_YYYYMMDD.dump user@NEW_SERVER:/tmp/
+rsync -avzP /opt/odoo/backups/production_db_fs_YYYYMMDD.tar.gz user@NEW_SERVER:/tmp/</code></pre>
+
+            <pre><code># ── On the TARGET server: Restore ──
+
+# 1. Stop Odoo on target
+sudo systemctl stop odoo
+
+# 2. Create database (ensure odoo user exists in PostgreSQL)
+sudo -u postgres createdb -O odoo production_db
+
+# 3. Restore database
+sudo cat /tmp/production_db_YYYYMMDD.dump \
+    | sudo -u postgres pg_restore -d production_db
+
+# 4. Restore filestore
+sudo -u odoo mkdir -p /opt/odoo/.local/share/Odoo/filestore/
+sudo -u odoo tar -xzf /tmp/production_db_fs_YYYYMMDD.tar.gz \
+    -C /opt/odoo/.local/share/Odoo/filestore/
+
+# 5. Verify filestore ownership
+sudo chown -R odoo:odoo /opt/odoo/.local/share/Odoo/filestore/production_db
+
+# 6. Update config to match new server (if domain/ports changed)
+sudo nano /etc/odoo/odoo.conf
+# Verify: db_name, addons_path, data_dir, http_port
+
+# 7. Clear assets and regenerate
+sudo -u postgres psql -d production_db \
+    -c "DELETE FROM ir_attachment WHERE name LIKE '%/web/assets/%';"
+
+# 8. Start Odoo
+sudo systemctl start odoo</code></pre>
+
+            <div class="alert alert-warning"><strong>Domain change?</strong> If the new server uses a different domain, update the <strong>web.base.url</strong> system parameter: Settings → Technical → Parameters → System Parameters → search for <code>web.base.url</code> and update it to the new domain.</div>
+
+            <h4>Restore with Database Manager (Web UI)</h4>
+            <p>If you prefer the web interface, enable the Database Manager first (see <a href="#db-manager">Database Manager section</a>), then:</p>
+            <pre><code># 1. Enable Database Manager
+sudo nano /etc/odoo/odoo.conf
+# Set: list_db = True, db_name = False, remove db_host
+sudo systemctl restart odoo
+
+# 2. Access: https://your-domain.com/web/database/manager
+#    Click "Restore Database" → upload the .zip backup file
+#    (Odoo Database Manager uses .zip format containing dump.sql + filestore)
+
+# 3. Re-secure after restore
+sudo nano /etc/odoo/odoo.conf
+# Set: list_db = False, db_name = production_db
+sudo systemctl restart odoo</code></pre>
+            <div class="tip"><strong>Backup format matters:</strong> The Database Manager uses <code>.zip</code> format (containing SQL dump + filestore). The command-line method in this guide uses <code>.dump</code> (pg_dump custom format) + separate filestore <code>.tar.gz</code>. They are <strong>not interchangeable</strong> — use the matching restore method for each format.</div>
+
+            <h4>Post-Restore Checklist</h4>
+            <pre><code># Verify database is accessible
+sudo -u postgres psql -d production_db -c "SELECT count(*) FROM res_users;"
+
+# Verify Odoo can start and serve requests
+sudo systemctl status odoo
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8069/web/login
+
+# Check logs for errors
+sudo journalctl -u odoo -n 50 --no-pager | grep -i error
+
+# If restoring to a NON-production environment, neutralize:
+# (see Database Cloning section for full neutralization SQL)</code></pre>
+
+            </div>
+        </details>
+
+        <details class="fold" open id="clone">
+            <summary>🔄 Database Cloning</summary>
+            <div class="fold-body">
+            <p>Clone a production database for staging, testing, or migration. The clone is a complete copy — same data, same filestore, same settings. <strong>Always neutralize the clone</strong> to prevent it from sending real emails, running cron jobs, or consuming your Enterprise license.</p>
+            <pre><code># ── Step 1: Clone the database (PostgreSQL template method) ──
+# IMPORTANT: -T (template) requires NO active connections to the source database.
+# You must stop production Odoo temporarily, or use the dump+restore method below.
+sudo systemctl stop odoo           # Stop production (required for -T method)
+sudo systemctl stop odoo-staging   # Stop target instance
+sudo -u postgres dropdb --if-exists staging_db
+sudo -u postgres createdb -O odoo -T production_db staging_db
+# -T = template (binary copy, faster than dump+restore for same PG version)
+sudo systemctl start odoo          # Restart production immediately after clone
+
+# ── Step 2: Clone the filestore ──
+sudo -u odoo rm -rf /opt/odoo/.local/share/Odoo-Staging/filestore/staging_db
+sudo -u odoo cp -a /opt/odoo/.local/share/Odoo/filestore/production_db \
+    /opt/odoo/.local/share/Odoo-Staging/filestore/staging_db
+
+# ── Step 3: Neutralize the clone (CRITICAL) ──
+sudo -u postgres psql -d staging_db << 'EOSQL'
+-- Disable outgoing mail (prevent sending real emails)
+UPDATE ir_mail_server SET active = false;
+UPDATE fetchmail_server SET active = false;
+
+-- Disable all cron jobs (prevent duplicate scheduled actions)
+UPDATE ir_cron SET active = false;
+
+-- Regenerate database secret (avoid session conflicts with production)
+UPDATE ir_config_parameter SET value = encode(gen_random_bytes(32), 'hex')
+WHERE key = 'database.secret';
+
+-- Clear the database UUID (forces new registration)
+UPDATE ir_config_parameter SET value = 'staging-' || encode(gen_random_bytes(16), 'hex')
+WHERE key = 'database.uuid';
+
+-- Mark as non-production (optional — helps identify in UI)
+UPDATE ir_config_parameter SET value = 'Staging Clone ' || NOW()::date
+WHERE key = 'database.enterprise_code';
+EOSQL
+
+# ── Step 4: Start staging instance ──
+sudo systemctl start odoo-staging
+echo "Staging clone ready at staging.example.com"</code></pre>
+
+            <h4>Alternative: Clone via Dump + Restore (Zero Downtime)</h4>
+            <p>Use this method to avoid stopping production. Also required when cloning across different PostgreSQL versions or to a remote server:</p>
+            <pre><code># Dump from production, restore to staging
+sudo -u postgres pg_dump -Fc production_db > /tmp/clone.dump
+sudo -u postgres dropdb --if-exists staging_db
+sudo -u postgres createdb -O odoo staging_db
+sudo cat /tmp/clone.dump | sudo -u postgres pg_restore -d staging_db
+rm /tmp/clone.dump
+
+# Then run the same neutralization SQL as above</code></pre>
+            <div class="alert alert-error"><strong>⚠️ Never skip neutralization!</strong> A non-neutralized clone will: send real emails to customers, run cron jobs (duplicate purchase orders, payroll runs), and potentially conflict with your Enterprise license registration.</div>
+            <div class="tip">Schedule regular staging refreshes (e.g., weekly) so testers always work with recent production data. Add the clone + neutralize commands to a script in <code>/opt/odoo/scripts/clone-to-staging.sh</code>.</div>
+            </div>
+        </details>
+
+
+        <details class="fold" open id="license">
+            <summary>🔑 Enterprise License</summary>
+            <div class="fold-body">
+            <p>Odoo Enterprise requires an active subscription linked to your database. The license is tied to the <code>database.uuid</code> and the number of active users.</p>
+            <pre><code># ── Register subscription via web UI ──
+# 1. Login as admin → Settings → General Settings
+# 2. Scroll to "Activate Odoo Enterprise" section
+# 3. Enter your subscription code and click "Register"
+
+# ── Check license status from command line ──
+sudo -u postgres psql -d production_db -c "
+SELECT key, value FROM ir_config_parameter
+WHERE key IN ('database.expiration_date', 'database.enterprise_code', 'database.uuid')
+ORDER BY key;"
+
+# ── Verify Enterprise modules are active ──
+sudo -u postgres psql -d production_db -t -c "
+SELECT CASE
+    WHEN EXISTS(SELECT 1 FROM ir_module_module WHERE name='web_enterprise' AND state='installed')
+    THEN 'Enterprise Edition ✓'
+    ELSE 'Community Edition'
+END;"
+
+# ── Check active user count (affects license billing) ──
+sudo -u postgres psql -d production_db -c "
+SELECT count(*) AS active_users FROM res_users
+WHERE active = true AND share = false AND login != '__system__';"</code></pre>
+            <div class="alert alert-warning"><strong>License renewal:</strong> If the expiration date passes, Odoo shows a banner but continues to work. However, you lose access to Enterprise module updates and support. Monitor with: <code>SELECT value FROM ir_config_parameter WHERE key='database.expiration_date';</code></div>
+            </div>
+        </details>
+
+
+        <details class="fold" id="service-commands">
+            <summary>🔧 Service Management Commands</summary>
+            <div class="fold-body">
+            <p>Essential systemctl and journalctl commands for managing Odoo services. Use these for starting, stopping, monitoring, and troubleshooting your Odoo instances.</p>
+            
+            <h4>Systemctl Commands</h4>
+            <p>Control Odoo services (use <code>odoo</code>, <code>odoo-staging</code>, <code>odoo-community</code>, or <code>odoo18</code> as the service name):</p>
+            <pre><code># Start the service
+sudo systemctl start odoo
+
+# Stop the service
+sudo systemctl stop odoo
+
+# Restart the service
+sudo systemctl restart odoo
+
+# Check service status
+sudo systemctl status odoo
+
+# Enable service to start on boot
+sudo systemctl enable odoo
+
+# Disable service from starting on boot
+sudo systemctl disable odoo
+
+# Reload systemd after editing service file
+sudo systemctl daemon-reload
+
+# Start all instances at once
+sudo systemctl start odoo odoo-staging odoo-community odoo18
+
+# Stop all instances at once
+sudo systemctl stop odoo odoo-staging odoo-community odoo18
+
+# Check status of all instances
+sudo systemctl status odoo*</code></pre>
+
+            <h4>Log Viewing (journalctl)</h4>
+            <p>View logs for troubleshooting and monitoring:</p>
+            <pre><code># View real-time logs (follow mode)
+sudo journalctl -u odoo -f
+
+# View recent logs (last 100 lines)
+sudo journalctl -u odoo -n 100
+
+# View logs from the last hour
+sudo journalctl -u odoo --since "1 hour ago"
+
+# View logs from today
+sudo journalctl -u odoo --since today
+
+# View logs with priority level (error and above)
+sudo journalctl -u odoo -p err
+
+# View logs for specific instance
+sudo journalctl -u odoo-staging -f
+sudo journalctl -u odoo-community -f
+sudo journalctl -u odoo18 -f
+
+# Search logs for specific text
+sudo journalctl -u odoo | grep "ERROR"
+
+# Export logs to file
+sudo journalctl -u odoo --since today > /tmp/odoo-logs.txt</code></pre>
+
+            <h4>Process Management</h4>
+            <p>Check running Odoo processes and resource usage:</p>
+            <pre><code># Check if Odoo is running
+ps aux | grep odoo-bin
+
+# Count worker processes
+ps aux | grep odoo-bin | grep -v grep | wc -l
+
+# View memory usage per worker
+ps aux --sort=-%mem | grep odoo-bin | head -20
+
+# Check which ports are in use
+sudo netstat -tulpn | grep odoo
+# or
+sudo ss -tulpn | grep odoo
+
+# Kill a specific Odoo process (use PID from ps aux)
+sudo kill -9 PID
+
+# Note: 'systemctl reload odoo' does NOT work — Odoo has no ExecReload handler.
+# Use 'systemctl restart odoo' for a full restart instead.</code></pre>
+
+            <h4>Quick Troubleshooting Commands</h4>
+            <pre><code># Check if service is active
+systemctl is-active odoo
+
+# Check if service is enabled
+systemctl is-enabled odoo
+
+# View last 50 error logs
+sudo journalctl -u odoo -p err -n 50
+
+# Check disk space (low disk causes issues)
+df -h
+
+# Check PostgreSQL is running
+sudo systemctl status postgresql
+
+# Test database connection
+sudo -u postgres psql -d production_db -c "SELECT version();"
+
+# Check Nginx is running
+sudo systemctl status nginx
+
+# Test Nginx configuration
+sudo nginx -t
+
+# Check if Odoo port is accessible
+curl -I http://localhost:8069/web/login</code></pre>
+            </div>
+        </details>
+
+
+        <details class="fold" id="shell">
+            <summary>🐍 Odoo Shell Recipes</summary>
+            <div class="fold-body">
+            <p>The Odoo shell gives you a Python REPL with full ORM access — essential for data fixes, bulk operations, and debugging. Start it with:</p>
+            <pre><code>sudo -u odoo /opt/odoo/odoo-venv/bin/python3 /opt/odoo/odoo-server/odoo-bin shell \
+    -c /etc/odoo/odoo.conf -d production_db --no-http</code></pre>
+            <p>Common recipes inside the shell:</p>
+            <pre><code># Reset a user's password
+user = env['res.users'].search([('login', '=', 'admin')])
+user.password = 'new_secure_password'
+env.cr.commit()
+
+# Find and fix stuck records
+stuck = env['sale.order'].search([('state', '=', 'draft'), ('create_date', '<', '2025-01-01')])
+print(f"Found {len(stuck)} old draft orders")
+
+# Bulk update field values
+env['hr.employee'].search([('department_id.name', '=', 'Production')]).write({'x_shift': 'morning'})
+env.cr.commit()
+
+# Check installed modules
+installed = env['ir.module.module'].search([('state', '=', 'installed')])
+for m in installed.sorted('name'):
+    print(f"{m.name}: {m.installed_version}")
+
+# Find records modified today
+from datetime import date
+today_partners = env['res.partner'].search([('write_date', '>=', date.today().isoformat())])
+print(f"{len(today_partners)} partners modified today")
+
+# Export data to CSV
+import csv
+orders = env['sale.order'].search([('state', '=', 'sale')], limit=100)
+with open('/tmp/orders.csv', 'w') as f:
+    w = csv.writer(f)
+    w.writerow(['ID', 'Customer', 'Amount', 'Date'])
+    for o in orders:
+        w.writerow([o.id, o.partner_id.name, o.amount_total, o.date_order])
+
+# Recompute a stored computed field
+env['sale.order'].search([])._compute_amount_all()
+env.cr.commit()
+
+# Always commit changes! Shell doesn't auto-commit.
+env.cr.commit()</code></pre>
+            <div class="alert alert-warning"><strong>Always <code>env.cr.commit()</code></strong> after making changes in the shell. Without it, all modifications are rolled back when you exit.</div>
+            </div>
+        </details>
+
+
+        <details class="fold" id="commands">
+            <summary>⌨️ Quick Commands</summary>
+            <div class="fold-body">
+            <pre><code># ══════ Service ══════
+sudo systemctl start|stop|restart|status odoo
+sudo systemctl start|stop|restart|status odoo-staging
+sudo systemctl start|stop|restart|status odoo-community
+sudo systemctl start|stop|restart|status odoo18
+sudo journalctl -u odoo -f --no-pager
+
+# ══════ Logs ══════
+tail -f /var/log/odoo/odoo.log | grep -iE "(error|warning|critical)"
+grep "Login failed" /var/log/odoo/odoo.log | tail -20
+
+# ══════ Database ══════
+sudo -u postgres psql -c "\l"
+sudo -u postgres psql -c "SELECT pg_size_pretty(pg_database_size('production_db'));"
+sudo -u postgres pg_dump -Fc production_db > backup.dump
+
+# ══════ License ══════
+sudo -u postgres psql -d production_db -c "SELECT key, value FROM ir_config_parameter WHERE key LIKE 'database.%' ORDER BY key;"
+
+# ══════ Module Update (PRODUCTION-SAFE with v19 protection) ══════
+# CRITICAL: NEVER update without backup + staging test!
+# For Egyptian payroll, protect salary rules FIRST:
+# sudo -u postgres psql -d production_db -c "UPDATE ir_model_data SET noupdate=true WHERE model='hr.salary.rule' AND module='l10n_eg_hr_payroll';"
+
+# Step 1: Backup (MANDATORY)
+BACKUP_DIR="/opt/odoo/backups"
+DATE=$(date +"%Y%m%d_%H%M%S")
+sudo -u postgres pg_dump -Fc production_db > $BACKUP_DIR/pre_update_$DATE.dump
+tar -czf $BACKUP_DIR/filestore_$DATE.tar.gz /opt/odoo/.local/share/Odoo/filestore/production_db/
+
+# Step 2: Test in staging FIRST
+sudo -u odoo /opt/odoo/odoo-venv/bin/python3 /opt/odoo/odoo-server/odoo-bin \
+    -c /etc/odoo/odoo-staging.conf -d staging_db -u module_name --stop-after-init
+
+# Step 3: If staging test passed, update production
+sudo systemctl stop odoo
+sudo -u odoo /opt/odoo/odoo-venv/bin/python3 /opt/odoo/odoo-server/odoo-bin \
+    -c /etc/odoo/odoo.conf -d production_db -u module_name --stop-after-init
+sudo systemctl start odoo
+
+# Step 4: Verify service started
+systemctl is-active odoo && echo "✓ Update successful" || echo "✗ Update failed - check logs"
+
+# ══════ Odoo Shell ══════
+sudo -u odoo /opt/odoo/odoo-venv/bin/python3 /opt/odoo/odoo-server/odoo-bin shell \
+    -c /etc/odoo/odoo.conf -d production_db --no-http
+
+# ══════ Cache Clear ══════
+sudo -u postgres psql -d production_db -c "DELETE FROM ir_attachment WHERE name LIKE '%/web/assets/%';"
+
+# ══════ Edition Check ══════
+sudo -u postgres psql -d production_db -c "SELECT name, state FROM ir_module_module WHERE name='web_enterprise';"
+# state='installed' = Enterprise, 'uninstallable' or missing = Community
+
+# ══════ Health Check ══════
+curl -s -o /dev/null -w "HTTP %{http_code}" http://localhost:8069/web/login
+sudo -u postgres psql -d production_db -c "SELECT count(*) AS active_users FROM res_users WHERE active=true;"
+ps aux | grep odoo-bin | grep -v grep | wc -l  # Should be workers+1+cron_threads
+df -h /opt/odoo /var/lib/postgresql  # Disk space check
+
+# ══════ Nginx & SSL ══════
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot certificates && sudo certbot renew --dry-run
+
+# ══════ Disk Usage ══════
+du -sh /opt/odoo/.local/share/Odoo/filestore/*
+sudo -u postgres psql -c "SELECT pg_size_pretty(pg_database_size(datname)) as size, datname FROM pg_database ORDER BY pg_database_size(datname) DESC;"
+
+# ══════ Scheduled Tasks ══════
+# Health:      Daily 7:00 AM    /etc/cron.d/odoo-health
+cat /etc/cron.d/odoo-*</code></pre>
+            </div>
+        </details>
+
+
+    </div>
+</article>
+
+<!-- ═══════════════════ PART 4 ═══════════════════ -->
+<article class="part" id="troubleshooting">
+    <header class="part-header" style="background:linear-gradient(135deg, var(--err), #B91C1C)">🛠 Part 4: Troubleshooting & Diagnostics</header>
+    <div class="part-content">
+        <details class="fold" id="troubleshoot">
+            <summary>🔍 Common Issues</summary>
+            <div class="fold-body">
+
+            <h4>🌐 Service &amp; Connectivity</h4>
+
+            <div class="ts"><strong>"fatal: detected dubious ownership" on git commands</strong><br>Running git as root in odoo-owned repo. ALWAYS use: <code>sudo -u odoo git pull</code>, <code>sudo -u odoo git log</code>, etc. Fix ownership once with: <code>sudo chown -R odoo:odoo /opt/odoo/odoo-server /opt/odoo/enterprise</code></div>
+
+            <div class="ts"><strong>502 Bad Gateway</strong><br>Odoo crashed or not started. Check <code>systemctl status odoo</code> and <code>tail -100 /var/log/odoo/odoo.log</code></div>
+
+            <div class="ts"><strong>Notifications/chat not working</strong><br>WebSocket/longpolling broken. In Odoo 19, real-time features use <code>/websocket</code> (primary) and <code>/longpolling</code> (fallback), both on port 8072. Verify Nginx proxies both: <code>ss -tlnp | grep 8072</code>. Check Nginx config has <code>proxy_http_version 1.1</code> and <code>Upgrade</code> headers for the <code>/websocket</code> location.</div>
+
+            <div class="ts"><strong>CSS/JS broken (white page)</strong><br>Asset cache corrupted. Fix: <code>DELETE FROM ir_attachment WHERE name LIKE '%/web/assets/%';</code> then Ctrl+Shift+R in browser.</div>
+
+            <div class="ts"><strong>Cannot login — "Session Expired" loop</strong><br>Session cookie conflict. Clear browser cookies for the domain, or: <code>DELETE FROM ir_sessions;</code> + restart Odoo.</div>
+
+            <div class="ts"><strong>Workers dying constantly (OOM)</strong><br>Memory exceeded. Reduce <code>workers</code> or increase <code>limit_memory_hard</code>. Diagnose: <code>dmesg | grep -i "killed process"</code></div>
+
+            <div class="ts"><strong>Cron jobs not running</strong><br>Check <code>max_cron_threads > 0</code> in odoo.conf. Also check Settings → Technical → Scheduled Actions for stuck jobs.</div>
+
+            <div class="ts"><strong>Emails stuck in outbox</strong><br>SMTP misconfigured or server unreachable. Check: Settings → Technical → Outgoing Mail Servers → Test Connection. Force retry: <code>UPDATE mail_mail SET state='outgoing' WHERE state='exception';</code></div>
+
+            <h4>📦 Data &amp; Modules</h4>
+
+            <div class="ts"><strong>Internal Server Error after cloning</strong><br><code>database.secret</code> was deleted. Regenerate: <code>UPDATE ir_config_parameter SET value=encode(gen_random_bytes(32),'hex') WHERE key='database.secret';</code></div>
+
+            <div class="ts"><strong>Custom rules reset after update</strong><br>noupdate flag missing. Fix: <code>UPDATE ir_model_data SET noupdate=true WHERE model='hr.salary.rule';</code></div>
+
+            <div class="ts"><strong>Broken Studio views</strong><br>Never delete views — fix XML directly or archive them. Check: <code>SELECT id, name FROM ir_ui_view WHERE arch_db::text LIKE '%error%';</code></div>
+
+            <div class="ts"><strong>Module won't install — "depends on X"</strong><br>Missing dependency. Install the required module first: <code>-i dependency_module</code>. Check with: <code>SELECT name, state FROM ir_module_module WHERE name='missing_module';</code></div>
+
+            <div class="ts"><strong>Duplicate partner records</strong><br>Common after imports. Find them: <code>SELECT email, count(*) FROM res_partner WHERE email IS NOT NULL GROUP BY email HAVING count(*)>1;</code> Merge via Contacts → Actions → Merge.</div>
+
+            <div class="ts"><strong>"Maximum recursion depth" error</strong><br>Circular dependency in computed fields. Check <code>@api.depends</code> chains — field A depends on B which depends on A.</div>
+
+            <div class="ts"><strong>Missing attachments after restore</strong><br>Filestore folder name must match database name. Check: <code>ls /opt/odoo/.local/share/Odoo/filestore/</code></div>
+
+            <div class="ts"><strong>Restore fails: "extension vector is not available"</strong><br>Odoo 19 AI features need pgvector. Install it (system-level, not pip): <code>sudo apt install postgresql-16-pgvector</code> then retry restore.</div>
+
+            <h4>⚡ Performance &amp; Configuration</h4>
+
+            <div class="ts"><strong>Slow performance / queries</strong><br>Check <code>jit = off</code> in PostgreSQL. Run <code>VACUUM ANALYZE;</code>. Enable slow query log: <code>log_min_duration_statement = 1000</code></div>
+
+            <div class="ts"><strong>PDF missing headers/footers</strong><br>Unpatched wkhtmltopdf. Install from GitHub, not apt. Verify: <code>wkhtmltopdf --version</code></div>
+
+            <div class="ts"><strong>License banner showing</strong><br>Check: <code>SELECT value FROM ir_config_parameter WHERE key='database.expiration_date';</code> Update to future date.</div>
+
+            </div>
+        </details>
+
+
+
+        <details class="fold" id="v19-issues">
+            <summary>⚡ Odoo 19 Specific Issues</summary>
+            <div class="fold-body">
+            <div class="alert alert-error"><strong>These issues are unique to Odoo 19 and will not occur in v18 or earlier.</strong> If upgrading from v18, check for these problems immediately.</div>
+
+            <div class="ts"><strong>"res.groups has no attribute 'category_id'" after upgrade</strong><br>v19 restructured res.groups to use privilege_id. Fix custom code: change <code>group.category_id</code> to <code>group.privilege_id.category_id</code>. SQL check: <code>SELECT COUNT(*) FROM res_groups WHERE privilege_id IS NULL AND category_id IS NOT NULL;</code></div>
+
+            <div class="ts"><strong>JSON API returns 404 after v19 upgrade</strong><br>Controller type changed from 'json' to 'jsonrpc'. Fix: Update all custom controllers: <code>@http.route('/api/endpoint', type='jsonrpc', auth='user')</code>. Find affected files: <code>grep -rn "type='json'" /opt/odoo/custom-addons/</code></div>
+
+            <div class="ts"><strong>UoM conversions broken — "uom_category not found"</strong><br>v19 removed the uom.category table. Fix custom code to use <code>relative_uom_id</code> instead of <code>category_id</code>. Check if table still exists: <code>SELECT COUNT(*) FROM information_schema.tables WHERE table_name='uom_category';</code></div>
+
+            <div class="ts"><strong>Egyptian payroll salary rules reset after upgrade</strong><br>Module upgrade overwrote custom computations. Prevention: <code>UPDATE ir_model_data SET noupdate=true WHERE model='hr.salary.rule' AND module='l10n_eg_hr_payroll';</code> Run BEFORE upgrading module. Check protection: <code>SELECT COUNT(*) FROM ir_model_data WHERE model='hr.salary.rule' AND module='l10n_eg_hr_payroll' AND noupdate=false;</code></div>
+
+            <div class="ts"><strong>Custom display_name not showing — "name_get() removed"</strong><br>v19 deprecated name_get(). Override <code>_compute_display_name</code> instead. Example fix:<br><code>@api.depends('code', 'name')</code><br><code>def _compute_display_name(self):</code><br><code>&nbsp;&nbsp;&nbsp;&nbsp;for rec in self: rec.display_name = f"[{rec.code}] {rec.name}"</code><br>Note: Do NOT redefine the <code>display_name</code> field itself or add <code>store=True</code> — it's a framework field. Only override the compute method.</div>
+
+            <div class="ts"><strong>"JSONB operations not supported" errors</strong><br>Using PostgreSQL 12 (v19 requires 13+). Verify version: <code>psql --version</code>. If &lt; 13, upgrade PostgreSQL: <code>sudo apt install postgresql-15</code> and migrate database.</div>
+
+            <div class="ts"><strong>Service won't start after v19 upgrade</strong><br>Check logs: <code>sudo journalctl -u odoo -n 100 | grep -i error</code>. Common causes: (1) Missing Python deps: <code>pip install -r /opt/odoo/odoo-server/requirements.txt</code>. (2) Database schema outdated: <code>-u base --stop-after-init</code>. (3) File permissions: <code>sudo chown -R odoo:odoo /opt/odoo/.local/share/Odoo/</code></div>
+
+            <div class="ts"><strong>Passkey/WebAuthn authentication not available</strong><br>v19 feature requires HTTPS (SSL) and must be enabled through the UI. Navigate to: Settings → Authentication → Passkeys. Ensure your Nginx is configured with a valid SSL certificate and <code>proxy_mode = True</code> is set in odoo.conf.</div>
+
+            <div class="ts"><strong>"read_group() deprecated" warnings in logs</strong><br>v19 changed internal API. Replace <code>read_group()</code> with <code>_read_group()</code> or <code>formatted_read_group()</code> in custom modules. Find usage: <code>grep -rn "\.read_group(" /opt/odoo/custom-addons/</code></div>
+
+            <div class="ts"><strong>"_apply_ir_rules" AttributeError after v19 upgrade</strong><br>v19 removed <code>_apply_ir_rules()</code>. Replace with: <code>query = self._search(domain, bypass_access=True)</code>. Find usage: <code>grep -rn "_apply_ir_rules" /opt/odoo/custom-addons/</code></div>
+
+            <div class="ts"><strong>"self._context" / "self._uid" AttributeError</strong><br>v19 deprecated direct context/uid access. Replace <code>self._context</code> with <code>self.env.context</code> and <code>self._uid</code> with <code>self.env.uid</code>. Find usage: <code>grep -rn "self\._context\|self\._uid" /opt/odoo/custom-addons/</code></div>
+
+            <div class="ts"><strong>Import errors for xlsxwriter or registry</strong><br>v19 changed import paths. Replace <code>from odoo.tools.misc import xlsxwriter</code> with <code>import xlsxwriter</code>. Replace <code>from odoo import registry</code> with <code>from odoo.modules.registry import Registry</code>. Find: <code>grep -rn "from odoo.tools.misc import xlsxwriter\|from odoo import registry" /opt/odoo/custom-addons/</code></div>
+            </div>
+        </details>
+
+
+
+
+
+        <details class="fold" id="diagnostics">
+            <summary>🔍 Database Diagnostic Queries</summary>
+            <div class="fold-body">
+            <p>Run these directly in PostgreSQL to diagnose performance issues and understand your database:</p>
+            <pre><code># Connect to database
+sudo -u postgres psql -d production_db</code></pre>
+            <pre><code>-- ── Top 10 largest tables ──
+SELECT relname AS table,
+       pg_size_pretty(pg_total_relation_size(relid)) AS total_size,
+       pg_size_pretty(pg_relation_size(relid)) AS data_size,
+       n_live_tup AS rows
+FROM pg_stat_user_tables
+ORDER BY pg_total_relation_size(relid) DESC LIMIT 10;
+
+-- ── Active connections and what they're doing ──
+SELECT pid, usename, state, query_start, 
+       NOW() - query_start AS duration,
+       LEFT(query, 80) AS query
+FROM pg_stat_activity 
+WHERE datname = current_database() AND state != 'idle'
+ORDER BY query_start;
+
+-- ── Kill a long-running query (use pid from above) ──
+-- SELECT pg_terminate_backend(PID_HERE);
+
+-- ── Tables needing VACUUM (dead tuples > 10K) ──
+SELECT relname, n_dead_tup, last_vacuum, last_autovacuum
+FROM pg_stat_user_tables
+WHERE n_dead_tup > 10000
+ORDER BY n_dead_tup DESC;
+
+-- ── Index usage (unused indexes waste disk + slow writes) ──
+SELECT indexrelname, idx_scan, pg_size_pretty(pg_relation_size(indexrelid)) AS size
+FROM pg_stat_user_indexes
+WHERE idx_scan = 0 AND schemaname = 'public'
+ORDER BY pg_relation_size(indexrelid) DESC LIMIT 15;
+
+-- ── User and login activity ──
+SELECT u.login, p.name
+FROM res_users u
+JOIN res_partner p ON u.partner_id = p.id
+WHERE u.active = true
+ORDER BY u.id LIMIT 20;
+
+-- ── Installed module count and versions ──
+SELECT state, count(*) FROM ir_module_module GROUP BY state ORDER BY count DESC;
+
+-- ── Check for duplicate partners (common data issue) ──
+SELECT email, count(*) as cnt, string_agg(name, ', ') as names
+FROM res_partner WHERE email IS NOT NULL AND active = true
+GROUP BY email HAVING count(*) > 1 ORDER BY cnt DESC LIMIT 10;
+
+-- ── Pending/failed cron jobs ──
+SELECT cron.cron_name, cron.interval_type, cron.interval_number,
+       cron.lastcall, cron.nextcall, cron.active
+FROM ir_cron cron WHERE active = true
+ORDER BY nextcall;</code></pre>
+            </div>
+        </details>
+
+
+        <details class="fold" id="emergency">
+            <summary>🚨 Emergency Recovery Procedures</summary>
+            <div class="fold-body">
+            <p>When things go seriously wrong — database corruption, failed upgrade, or accidental data loss:</p>
+            <pre><code># ══ SCENARIO 1: Failed module upgrade (database inconsistent) ══
+# Restore from the backup you made BEFORE the upgrade
+ls -lh /opt/odoo/backups/
+sudo systemctl stop odoo
+sudo -u postgres dropdb production_db
+sudo -u postgres createdb -O odoo production_db
+sudo -u postgres pg_restore -d production_db /opt/odoo/backups/LATEST.dump
+sudo systemctl start odoo
+
+# ══ SCENARIO 2: Odoo won't start at all ══
+# Check the actual error (--no-http avoids port conflict if another instance is running)
+sudo systemctl stop odoo
+sudo -u odoo /opt/odoo/odoo-venv/bin/python3 /opt/odoo/odoo-server/odoo-bin \
+    -c /etc/odoo/odoo.conf --no-http --log-level=debug 2>&1 | head -100
+# Common causes: Python import error, missing dependency, corrupt config
+# Or check logs without stopping: sudo journalctl -u odoo -n 50 --no-pager
+
+# ══ SCENARIO 3: Locked out — can't login as admin ══
+# Direct SQL won't work — Odoo stores hashed passwords, not plain text.
+# Step 1: Open Odoo shell
+sudo systemctl stop odoo
+sudo -u odoo /opt/odoo/odoo-venv/bin/python3 /opt/odoo/odoo-server/odoo-bin shell \
+    -c /etc/odoo/odoo.conf -d production_db --no-http</code></pre>
+            <pre><code># Step 2: In the Odoo shell — V19: ID 1 = __system__ (internal), ID 2 = admin
+env['res.users'].browse(2).password = 'admin'
+env.cr.commit()
+exit()</code></pre>
+            <pre><code># Step 3: Start Odoo and login with admin/admin, then change password in UI immediately
+sudo systemctl start odoo
+
+# ══ SCENARIO 4: Database won't start (PostgreSQL error) ══
+sudo -u postgres pg_isready                              # Check if PG is running
+sudo systemctl status postgresql@16-main --no-pager      # Actual PG service (not wrapper)
+sudo tail -30 /var/log/postgresql/postgresql-16-main.log  # PG error log
+# If "Cannot allocate memory": check postgresql.auto.conf shared_buffers vs actual RAM
+cat /var/lib/postgresql/16/main/postgresql.auto.conf | grep shared_buffers
+free -h
+# If disk full: clear old logs, backups, or WAL files
+du -sh /var/lib/postgresql/16/main/pg_wal/  # WAL can grow huge
+
+# ══ SCENARIO 5: Need to rollback a specific table ══
+# If you have a recent backup, restore just one table:
+sudo cat /opt/odoo/backups/LATEST.dump | sudo -u postgres pg_restore -d production_db --data-only -t table_name
+
+# ══ SCENARIO 6: Accidental mass delete/update ══
+# If you caught it quickly (within seconds), PostgreSQL may still have the data:
+# IMMEDIATELY stop Odoo to prevent VACUUM from cleaning up
+sudo systemctl stop odoo
+# Restore from backup (there's no built-in undo in PostgreSQL)
+# See Scenario 1 for full restore, or Scenario 5 for single-table restore</code></pre>
+            
+            </div>
+        </details>
+
+
+    </div>
+</article>
+
+<!-- ═══════════════════ PART 5 ═══════════════════ -->
+<article class="part" id="reference">
+    <header class="part-header ac">📚 Part 5: Reference</header>
+    <div class="part-content">
+
+        <details class="fold" id="config-ref">
+            <summary>📋 Configuration Reference</summary>
+            <div class="fold-body">
+            <p>Key <code>odoo.conf</code> parameters explained:</p>
+            <div class="table-wrap">
+                <table>
+                    <tr><th>Parameter</th><th>Description</th><th>Production Default</th></tr>
+                    <tr><td><code>addons_path</code></td><td>Comma-separated module directories</td><td>community,enterprise,custom</td></tr>
+                    <tr><td><code>workers</code></td><td>HTTP worker processes</td><td>(CPU × 2) + 1</td></tr>
+                    <tr><td><code>max_cron_threads</code></td><td>Background scheduled job threads</td><td>2</td></tr>
+                    <tr><td><code>limit_memory_hard</code></td><td>Kill worker if memory exceeds (bytes)</td><td>2684354560 (2.5 GB)</td></tr>
+                    <tr><td><code>limit_memory_soft</code></td><td>Recycle worker after request (bytes)</td><td>2147483648 (2 GB)</td></tr>
+                    <tr><td><code>limit_time_cpu</code></td><td>Max CPU seconds per request</td><td>600</td></tr>
+                    <tr><td><code>limit_time_real</code></td><td>Max wall-clock seconds per request</td><td>1200</td></tr>
+                    <tr><td><code>limit_request</code></td><td>Recycle worker after N requests</td><td>8192</td></tr>
+                    <tr><td><code>db_maxconn</code></td><td>Max DB connections per worker pool</td><td>32</td></tr>
+                    <tr><td><code>list_db</code></td><td>Expose database manager</td><td>False</td></tr>
+                    <tr><td><code>proxy_mode</code></td><td>Trust X-Forwarded-* from Nginx</td><td>True</td></tr>
+                    <tr><td><code>gevent_port</code></td><td>Longpolling/websocket port (Odoo 19)</td><td>8072</td></tr>
+                    <tr><td><code>log_level</code></td><td>Verbosity: debug/info/warn/error</td><td>warn</td></tr>
+                </table>
+            </div>
+            </div>
+        </details>
+
+
+
+        <details class="fold" id="checklist">
+            <summary>✅ Production Checklist</summary>
+            <div class="fold-body">
+            <div class="table-wrap">
+                <table class="checklist">
+                    <tr><th>Category</th><th>Item</th><th>✓</th></tr>
+                    <tr><td rowspan="5">Security</td><td>Strong <code>admin_passwd</code> (hashed with pbkdf2)</td><td>☐</td></tr>
+                    <tr><td><code>list_db = False</code></td><td>☐</td></tr>
+                    <tr><td>SSL certificate (auto-renewing)</td><td>☐</td></tr>
+                    <tr><td>UFW: ports 8069/8072 blocked</td><td>☐</td></tr>
+                    <tr><td>Fail2ban with Odoo filter</td><td>☐</td></tr>
+                    <tr><td rowspan="3">Performance</td><td>Workers = (CPU × 2) + 1</td><td>☐</td></tr>
+                    <tr><td>PostgreSQL: <code>jit = off</code></td><td>☐</td></tr>
+                    <tr><td>Nginx static file caching</td><td>☐</td></tr>
+                    <tr><td rowspan="4">Operations</td><td>Daily automated backups</td><td>☐</td></tr>
+                    <tr><td>Restore tested successfully</td><td>☐</td></tr>
+                    <tr><td>Offsite backup configured</td><td>☐</td></tr>
+                    <tr><td>Log management configured (journalctl retention or logfile)</td><td>☐</td></tr>
+                    <tr><td rowspan="2">License</td><td>Enterprise registered</td><td>☐</td></tr>
+                    <tr><td>Expiration date valid</td><td>☐</td></tr>
+                    <tr><td rowspan="3">Setup</td><td>Edition chosen (Enterprise/Community)</td><td>☐</td></tr>
+                    <tr><td>Demo data disabled (<code>--without-demo=all</code>)</td><td>☐</td></tr>
+                    <tr><td>Default admin password changed</td><td>☐</td></tr>
+                </table>
+            </div>
+            </div>
+        </details>
+
+
+        <details class="fold" id="directory">
+            <summary>📁 Directory Structure</summary>
+            <div class="fold-body">
+            <pre><code>/opt/odoo/
+├── odoo-server/              # v19 Community source
+├── enterprise/               # v19 Enterprise modules
+├── odoo18-server/            # v18 Community source
+├── enterprise18/             # v18 Enterprise modules (if licensed)
+├── custom-addons/            # Your custom modules
+├── odoo-venv/                # Python venv (v19)
+├── odoo18-venv/              # Python venv (v18)
+├── backups/                  # Database + filestore backups
+└── .local/share/
+    ├── Odoo/filestore/       # Production filestore
+    ├── Odoo-Staging/filestore/  # Staging filestore
+    ├── Odoo-Community/filestore/ # Community filestore
+    └── Odoo18/filestore/     # Odoo 18 filestore
+
+/etc/odoo/                    # Configuration files
+├── odoo.conf                 #   Production config (v19)
+├── odoo-staging.conf         #   Staging config (v19)
+├── odoo-community.conf       #   Community config (v19)
+└── odoo18.conf               #   Odoo 18 config
+/var/log/odoo/                # Log files
+/etc/systemd/system/          # Service definitions
+├── odoo.service              #   Production service (v19)
+├── odoo-staging.service      #   Staging service (v19)
+├── odoo-community.service    #   Community (v19)
+└── odoo18.service            #   Odoo 18 (v18)
+/var/run/odoo.pid             # Process ID file</code></pre>
+            </div>
+        </details>
+
+
+        <details class="fold" id="windows">
+            <summary>🪟 Windows: Odoo Command-Line Reference</summary>
+            <div class="fold-body">
+            <p>When Odoo is installed on Windows via the official <code>.exe</code> installer, the directory structure, user names, and commands differ from Linux. This section covers common operations for Windows installations.</p>
+
+            <h4>Default Paths (Installer)</h4>
+            <pre><code>Odoo Install:     C:\Program Files\Odoo 19.0e.YYYYMMDD\
+PostgreSQL:       C:\Program Files\Odoo 19.0e.YYYYMMDD\PostgreSQL\
+Config File:      C:\Program Files\Odoo 19.0e.YYYYMMDD\server\odoo.conf
+pg_hba.conf:      C:\Program Files\Odoo 19.0e.YYYYMMDD\PostgreSQL\data\pg_hba.conf
+Filestore:        C:\Users\Admin\AppData\Local\OpenERP S.A\Odoo\filestore\
+Service Name:     odoo-server-19.0</code></pre>
+            <div class="tip"><strong>Path varies by version.</strong> Replace <code>19.0e.YYYYMMDD</code> with your actual folder name — check <code>dir "C:\Program Files\" | findstr Odoo</code> to see the exact name.</div>
+
+            <h4>PowerShell Basics (Run as Administrator)</h4>
+            <p>All commands below require <strong>PowerShell as Administrator</strong>: right-click Start → Terminal (Admin). Without admin, you'll get <code>System error 5: Access is denied</code>.</p>
+            <pre><code># ── Service Management ──
+net stop "odoo-server-19.0"
+net start "odoo-server-19.0"
+
+# ── View Configuration ──
+type "C:\Program Files\Odoo 19.0e.YYYYMMDD\server\odoo.conf"
+
+# ── Edit Configuration ──
+notepad "C:\Program Files\Odoo 19.0e.YYYYMMDD\server\odoo.conf"</code></pre>
+
+            <h4>PostgreSQL Commands</h4>
+            <p>The Windows installer creates a PostgreSQL user called <strong><code>openpg</code></strong> (not <code>odoo</code> or <code>postgres</code> like on Linux). All <code>psql</code> and <code>pg_*</code> commands use <code>-U openpg</code>.</p>
+
+            <pre><code># ══════════════════════════════════════════════════════════════
+# STEP 1: Run these TWO lines FIRST every time you open PowerShell
+# (they reset when you close the window)
+# ══════════════════════════════════════════════════════════════
+$pg = "C:\Program Files\Odoo 19.0e.YYYYMMDD\PostgreSQL\bin"
+$env:PGPASSWORD="your_db_password"
+# Find your password: type "C:\...\server\odoo.conf" | findstr db_password
+
+# ══════════════════════════════════════════════════════════════
+# STEP 2: Now use any command below
+# ══════════════════════════════════════════════════════════════
+
+# ── List all databases ──
+& "$pg\psql.exe" -U openpg -d postgres -l
+
+# ── Connect to a database (interactive SQL) ──
+& "$pg\psql.exe" -U openpg -d enterprise
+
+# ── Run a quick SQL query ──
+& "$pg\psql.exe" -U openpg -d enterprise -c "SELECT count(*) FROM res_users;"
+
+# ── List database roles/users ──
+& "$pg\psql.exe" -U openpg -d postgres -c "\du"</code></pre>
+            <div class="alert alert-info"><strong>Always use <code>-d postgres</code></strong> for admin commands (list databases, alter users, etc.). Without <code>-d</code>, psql tries to connect to a database named after the user (<code>openpg</code>), which may not exist and gives: <code>FATAL: database "openpg" does not exist</code>.</div>
+            <div class="alert alert-warning"><strong><code>$pg</code> and <code>$env:PGPASSWORD</code> reset every time you close PowerShell.</strong> You must set them again in each new session. Alternatively, always use the full path: <code>& "C:\Program Files\Odoo 19.0e.YYYYMMDD\PostgreSQL\bin\psql.exe" -U openpg -d postgres -l</code></div>
+
+            <h4>Backup &amp; Restore</h4>
+            <p>Ensure <code>$pg</code> and <code>$env:PGPASSWORD</code> are set first (see above).</p>
+            <pre><code># ── Create backup folder ──
+mkdir C:\backup
+
+# ── Backup (custom format, compressed) ──
+& "$pg\pg_dump.exe" -U openpg -Fc enterprise > C:\backup\enterprise.dump
+
+# ── Restore ──
+# 1. Stop Odoo first
+net stop "odoo-server-19.0"
+
+# 2. Drop old database (if replacing)
+& "$pg\dropdb.exe" -U openpg enterprise
+
+# 3. Create fresh database
+& "$pg\createdb.exe" -U openpg enterprise
+
+# 4. Restore from dump
+& "$pg\pg_restore.exe" -U openpg -d enterprise "C:\backup\enterprise.dump"
+
+# 5. Start Odoo
+net start "odoo-server-19.0"</code></pre>
+
+            <h4>Restore from Linux Server (Cross-Version)</h4>
+            <p>If the dump was created with a newer PostgreSQL (e.g. v16 on Linux) and your Windows has an older version (e.g. v12), <code>pg_restore</code> will fail with <code>unsupported version (1.15) in file header</code>. Use a <strong>plain SQL dump</strong> instead:</p>
+            <pre><code># ── On the Linux server: Create plain SQL dump ──
+sudo -u postgres pg_dump --format=plain --no-owner --no-privileges your_database > /tmp/database_plain.sql
+
+# Compress (1.9GB → ~200MB)
+gzip /tmp/database_plain.sql
+
+# Transfer to Windows via SCP, WinSCP, FileZilla, etc.</code></pre>
+
+            <pre><code># ── On Windows: Decompress and restore ──
+# Decompress the .gz file using 7-Zip or WinRAR first
+
+# Drop and recreate
+& "$pg\dropdb.exe" -U openpg your_database
+& "$pg\createdb.exe" -U openpg your_database
+
+# Restore using psql (not pg_restore — plain SQL uses psql)
+& "$pg\psql.exe" -U openpg -d your_database -f "C:\path\to\database_plain.sql"
+
+# Verify
+& "$pg\psql.exe" -U openpg -d your_database -c "SELECT count(*) FROM res_users;"
+
+# Update odoo.conf with the database name
+notepad "C:\Program Files\Odoo 19.0e.YYYYMMDD\server\odoo.conf"
+# Set: db_name = your_database
+
+# Start Odoo
+net start "odoo-server-19.0"</code></pre>
+            <div class="alert alert-warning"><strong>Plain SQL dumps are large</strong> (often 1-2GB+ uncompressed). Always <code>gzip</code> on the server before transferring. The restore will take several minutes for large databases.</div>
+            <div class="tip"><strong><code>\unrestrict</code> error at the end?</strong> This is a PostgreSQL 16+ command not recognized by older versions. It's harmless — the data is fully restored. Verify with <code>SELECT count(*) FROM res_users;</code></div>
+
+            <h4>Password Reset</h4>
+            <p>If you forgot the PostgreSQL password or get <code>password authentication failed</code>:</p>
+            <pre><code># 1. Stop Odoo
+net stop "odoo-server-19.0"
+
+# 2. Edit pg_hba.conf — change all "md5" to "trust" temporarily
+notepad "C:\Program Files\Odoo 19.0e.YYYYMMDD\PostgreSQL\data\pg_hba.conf"
+# Change lines to:
+#   host    all    all    127.0.0.1/32    trust
+#   host    all    all    ::1/128         trust
+
+# 3. Start Odoo (restarts PostgreSQL too)
+net start "odoo-server-19.0"
+
+# 4. Connect without password and reset (use FULL PATH + -d postgres)
+& "C:\Program Files\Odoo 19.0e.YYYYMMDD\PostgreSQL\bin\psql.exe" -U openpg -d postgres -c "ALTER USER openpg WITH PASSWORD 'new_password';"
+
+# 5. Revert pg_hba.conf back to "md5" (CRITICAL for security!)
+notepad "C:\Program Files\Odoo 19.0e.YYYYMMDD\PostgreSQL\data\pg_hba.conf"
+# Change back to:
+#   host    all    all    127.0.0.1/32    md5
+#   host    all    all    ::1/128         md5
+
+# 6. Update odoo.conf with the new password
+notepad "C:\Program Files\Odoo 19.0e.YYYYMMDD\server\odoo.conf"
+# Set: db_password = new_password
+
+# 7. Restart
+net stop "odoo-server-19.0"
+net start "odoo-server-19.0"
+
+# 8. Verify (set password variable first)
+$env:PGPASSWORD="new_password"
+& "C:\Program Files\Odoo 19.0e.YYYYMMDD\PostgreSQL\bin\psql.exe" -U openpg -d postgres -l</code></pre>
+            <div class="alert alert-error"><strong>🔒 Never leave <code>trust</code> in pg_hba.conf!</strong> It allows anyone to connect without a password. Always revert to <code>md5</code> after resetting.</div>
+            <div class="alert alert-warning"><strong>pg_hba.conf syntax errors</strong> cause <code>FATAL: could not load pg_hba.conf</code>. If this happens, re-open the file and check for typos, extra spaces, or missing columns. Each line must have exactly: <code>TYPE  DATABASE  USER  ADDRESS  METHOD</code>.</div>
+
+            <h4>Key Differences: Windows vs Linux</h4>
+            <div class="table-wrap">
+                <table>
+                    <tr><th>Item</th><th>Linux (Ubuntu)</th><th>Windows (Installer)</th></tr>
+                    <tr><td>PostgreSQL user</td><td><code>odoo</code></td><td><code>openpg</code></td></tr>
+                    <tr><td>Default database</td><td><code>production_db</code> (you name it)</td><td><code>enterprise</code> (auto-created)</td></tr>
+                    <tr><td>Service control</td><td><code>sudo systemctl start/stop odoo</code></td><td><code>net start/stop "odoo-server-19.0"</code></td></tr>
+                    <tr><td>Admin required</td><td><code>sudo</code></td><td>PowerShell as Administrator</td></tr>
+                    <tr><td>Config file</td><td><code>/etc/odoo/odoo.conf</code></td><td><code>C:\...\server\odoo.conf</code></td></tr>
+                    <tr><td>Filestore</td><td><code>/opt/odoo/.local/share/Odoo/filestore/</code></td><td><code>C:\Users\...\AppData\Local\OpenERP S.A\Odoo\filestore\</code></td></tr>
+                    <tr><td>Run as service user</td><td><code>sudo -u odoo ...</code></td><td>Not needed (runs as Windows service)</td></tr>
+                    <tr><td>pg_hba.conf auth</td><td><code>peer</code> (Unix socket)</td><td><code>md5</code> (TCP only, password always required)</td></tr>
+                    <tr><td>psql default DB</td><td>Connects to user's DB</td><td>Must specify <code>-d postgres</code></td></tr>
+                    <tr><td>Template databases</td><td colspan="2"><code>template0</code>, <code>template1</code>, <code>postgres</code> — <strong>never delete these</strong></td></tr>
+                </table>
+            </div>
+
+            <h4>Common Windows Errors</h4>
+            <div class="ts"><strong><code>System error 5: Access is denied</code></strong><br>Not running as Administrator. Right-click Start → Terminal (Admin).</div>
+            <div class="ts"><strong><code>The term '\psql.exe' is not recognized</code></strong><br>The <code>$pg</code> variable was not set in this session. PowerShell variables reset when you close the window. Set it again: <code>$pg = "C:\Program Files\Odoo 19.0e.YYYYMMDD\PostgreSQL\bin"</code></div>
+            <div class="ts"><strong><code>FATAL: database "openpg" does not exist</code></strong><br>Missing <code>-d</code> flag. Add <code>-d postgres</code> to your command (or the name of your actual database).</div>
+            <div class="ts"><strong><code>FATAL: password authentication failed</code></strong><br>Wrong password. Check <code>db_password</code> in <code>odoo.conf</code>, or reset via the pg_hba.conf trust method above.</div>
+            <div class="ts"><strong><code>FATAL: could not load pg_hba.conf</code></strong><br>Syntax error in pg_hba.conf. Open it and check each line has exactly: TYPE, DATABASE, USER, ADDRESS, METHOD — separated by spaces/tabs.</div>
+            <div class="ts"><strong><code>FATAL: role "odoo" does not exist</code> / <code>role "postgres" does not exist</code></strong><br>Windows installer uses <code>openpg</code> as the PostgreSQL user, not <code>odoo</code> or <code>postgres</code>. Always use <code>-U openpg</code>.</div>
+            <div class="ts"><strong><code>unsupported version (1.15) in file header</code></strong><br>The dump was created with a newer PostgreSQL than yours (e.g. dump from v16, restoring on v12). Use plain SQL dump instead: on the source server run <code>pg_dump --format=plain --no-owner</code>, then restore with <code>psql -f</code> instead of <code>pg_restore</code>. See "Restore from Linux Server" above.</div>
+            <div class="ts"><strong><code>invalid command \unrestrict</code> at end of restore</strong><br>Harmless. This is a PostgreSQL 16+ command not recognized by older versions. Your data is fully restored — verify with <code>SELECT count(*) FROM res_users;</code></div>
+            <div class="ts"><strong><code>type "vector" does not exist</code> during module upgrade</strong><br>pgvector extension not installed. See "Install pgvector on Windows" section below. Download pre-compiled binaries, copy to PostgreSQL directory, then run <code>CREATE EXTENSION IF NOT EXISTS vector;</code></div>
+
+            <div class="alert alert-warning"><strong>Template databases:</strong> <code>template0</code>, <code>template1</code>, and <code>postgres</code> are system databases required by PostgreSQL. Deleting them will prevent creating new databases. Only delete databases you created yourself.</div>
+
+            <h4>Upgrade PostgreSQL (e.g. 12 → 16)</h4>
+            <p>The Odoo Windows installer bundles an older PostgreSQL (often v12). Odoo 19 requires <strong>13+ minimum</strong> (16 recommended for pgvector/AI features). Two methods available:</p>
+
+            <h4 style="font-size:.95rem">Method A: Clean Install (Recommended)</h4>
+            <p>Uninstall old PostgreSQL completely, then install new. Simpler and avoids port conflicts.</p>
+            <pre><code># ── Step 1: Backup database (BOTH formats for safety) ──
+mkdir C:\backup
+& "$pg\pg_dump.exe" -U openpg -Fc your_database > C:\backup\database.dump
+& "$pg\pg_dump.exe" -U openpg --format=plain --no-owner your_database > C:\backup\database_plain.sql
+
+# ── Step 2: Backup odoo.conf and filestore ──
+copy "C:\Program Files\Odoo 19.0\server\odoo.conf" C:\backup\odoo.conf.bak
+xcopy "C:\Users\Admin\AppData\Local\OpenERP S.A\Odoo\filestore" "C:\backup\filestore\" /E /I
+
+# ── Step 3: Stop everything ──
+net stop "odoo-server-19.0"
+
+# ── Step 4: Uninstall old PostgreSQL ──
+# Control Panel → Programs → Uninstall:
+#   - Uninstall any standalone PostgreSQL (e.g. PostgreSQL 15)
+#   - Uninstall Odoo (removes bundled PostgreSQL 12 with it)
+# Or disable old service: sc config "PostgreSQL_For_Odoo" start= disabled
+
+# ── Step 5: Install PostgreSQL 16 ──
+# Download from https://www.postgresql.org/download/windows/ (EDB installer)
+# During install:
+#   Port: 5432 (standard)
+#   Superuser (postgres) password: remember it!
+
+# ── Step 6: Install pgvector (see section below) ──
+
+# ── Step 7: Create user and database ──
+$pg16 = "C:\Program Files\PostgreSQL\16\bin"
+$env:PGPASSWORD="postgres_superuser_password"
+
+& "$pg16\psql.exe" -U postgres -d postgres -c "CREATE USER openpg WITH SUPERUSER CREATEDB PASSWORD 'your_db_password';"
+
+$env:PGPASSWORD="your_db_password"
+& "$pg16\createdb.exe" -U openpg your_database
+
+# ── Step 8: Install pgvector extension in database ──
+& "$pg16\psql.exe" -U openpg -d your_database -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+# ── Step 9: Restore ──
+# Try custom format first:
+& "$pg16\pg_restore.exe" -U openpg -d your_database "C:\backup\database.dump"
+
+# If it fails (version mismatch), use plain SQL:
+& "$pg16\psql.exe" -U openpg -d your_database -f "C:\backup\database_plain.sql"
+
+# ── Step 10: Verify ──
+& "$pg16\psql.exe" -U openpg -d your_database -c "SELECT count(*) FROM res_users;"
+& "$pg16\psql.exe" -U openpg -d your_database -c "SELECT version();"</code></pre>
+
+            <pre><code># ── Step 11: Re-install Odoo ──
+# Download from https://www.odoo.com/page/download
+# During install, set PostgreSQL connection:
+#   Host: localhost, Port: 5432, User: openpg, Password: your_db_password
+
+# ── Step 12: Update odoo.conf ──
+notepad "C:\Program Files\Odoo 19.0\server\odoo.conf"
+# Set: db_name = your_database
+
+# ── Step 13: Start Odoo ──
+net start "odoo-server-19.0"
+# Open http://localhost:8069
+# Go to Settings → Developer Tools → Update Apps List → Upgrade base module</code></pre>
+
+            <h4 style="font-size:.95rem">Method B: Side-by-Side (Keep Old Running)</h4>
+            <p>Install new PostgreSQL alongside old one on a different port, migrate, then switch.</p>
+            <pre><code># ── Install PostgreSQL 16 on port 5433 (temporary) ──
+# Same EDB installer, but set port to 5433 during install
+
+$pg16 = "C:\Program Files\PostgreSQL\16\bin"
+$env:PGPASSWORD="postgres_superuser_password"
+
+# Create user and database on new server
+& "$pg16\psql.exe" -U postgres -p 5433 -d postgres -c "CREATE USER openpg WITH SUPERUSER CREATEDB PASSWORD 'your_db_password';"
+
+$env:PGPASSWORD="your_db_password"
+& "$pg16\createdb.exe" -U openpg -p 5433 your_database
+& "$pg16\psql.exe" -U openpg -p 5433 -d your_database -c "CREATE EXTENSION IF NOT EXISTS vector;"
+& "$pg16\pg_restore.exe" -U openpg -p 5433 -d your_database "C:\backup\database.dump"
+
+# After verifying, switch ports:
+# Old PostgreSQL → port 5434 (or disable in services.msc)
+# New PostgreSQL 16 → port 5432
+# Update odoo.conf → db_port = 5432</code></pre>
+            <div class="alert alert-error"><strong>⚠️ Don't delete old PostgreSQL</strong> until you've confirmed everything works on the new one. Keep backups in <code>C:\backup\</code>.</div>
+            <div class="tip"><strong>After confirming:</strong> Disable old service in <code>services.msc</code> → set Startup Type to "Disabled". Or uninstall from Control Panel.</div>
+
+            <h4>Install pgvector on Windows (Manual)</h4>
+            <p>Odoo 19 AI features require <strong>pgvector</strong>. It's not available in StackBuilder, so install it manually using pre-compiled binaries:</p>
+            <pre><code># ── Step 1: Download pre-compiled pgvector for your PostgreSQL version ──
+# https://github.com/andreiramani/pgvector_pgsql_windows/releases
+# Download: "pgvector v0.8.1 for PostgreSQL 16, Microsoft Windows"
+# Extract the zip file
+
+# ── Step 2: Copy files to PostgreSQL directory ──
+copy "C:\Users\Admin\Downloads\vector.v0.8.1-pg16\lib\*" "C:\Program Files\PostgreSQL\16\lib\"
+xcopy "C:\Users\Admin\Downloads\vector.v0.8.1-pg16\share\*" "C:\Program Files\PostgreSQL\16\share\" /E /I /Y
+
+# ── Step 3: Restart PostgreSQL ──
+net stop "postgresql-x64-16"
+net start "postgresql-x64-16"
+
+# ── Step 4: Enable in your database ──
+$pg16 = "C:\Program Files\PostgreSQL\16\bin"
+$env:PGPASSWORD="your_db_password"
+& "$pg16\psql.exe" -U openpg -d your_database -c "CREATE EXTENSION IF NOT EXISTS vector;"
+# Should output: CREATE EXTENSION</code></pre>
+            <div class="alert alert-info"><strong>Why pgvector?</strong> Odoo 19 uses it for AI embeddings (<code>ai_embedding</code> table). Without it, upgrading modules fails with <code>type "vector" does not exist</code>. The extension only needs to be created once per database.</div>
+            <div class="alert alert-warning"><strong>Match versions!</strong> Download the pgvector binary that matches your PostgreSQL version exactly. Using pg14 binaries on pg16 will not work.</div>
+
+            <h4>Odoo Source Update (Windows Installer)</h4>
+            <p>The Windows <code>.exe</code> installer does not use git — it installs Odoo as a standalone application. To update:</p>
+
+            <h4 style="font-size:.95rem">Method 1: Re-download Installer (Recommended)</h4>
+            <pre><code># 1. Backup database
+& "$pg\pg_dump.exe" -U openpg -Fc enterprise > C:\backup\enterprise_before_update.dump
+
+# 2. Stop Odoo
+net stop "odoo-server-19.0"
+
+# 3. Download latest installer from:
+#    https://www.odoo.com/page/download
+#    Choose: Odoo 19 Enterprise (or Community) → Windows
+
+# 4. Run the new installer
+#    It will detect the existing installation and update in-place
+#    Your database and filestore are preserved
+
+# 5. Start Odoo
+net start "odoo-server-19.0"
+
+# 6. Update module schema (from browser)
+#    Go to: Settings → Developer Tools → Update Apps List
+#    Then update specific modules as needed</code></pre>
+
+            <h4 style="font-size:.95rem">Method 2: Git Clone (For Developers)</h4>
+            <p>If you want git-based updates like on Linux, install <a href="https://git-scm.com/download/win">Git for Windows</a> and clone the source:</p>
+            <pre><code># 1. Install Git for Windows from https://git-scm.com/download/win
+
+# 2. Clone Odoo source (into the installer's server directory)
+cd "C:\Program Files\Odoo 19.0e.YYYYMMDD\server"
+git clone https://github.com/odoo/odoo.git --depth 1 --branch 19.0 odoo
+git clone git@github.com:odoo/enterprise.git --depth 1 --branch 19.0 enterprise
+
+# 3. Update odoo.conf to point to the git source
+notepad "C:\Program Files\Odoo 19.0e.YYYYMMDD\server\odoo.conf"
+# Update addons_path to include:
+#   addons_path = C:\Program Files\Odoo 19.0e.YYYYMMDD\server\odoo\addons,C:\Program Files\Odoo 19.0e.YYYYMMDD\server\enterprise
+
+# 4. Update using same method as Linux
+cd "C:\Program Files\Odoo 19.0e.YYYYMMDD\server\odoo"
+git fetch
+git rebase --autostash
+
+cd "C:\Program Files\Odoo 19.0e.YYYYMMDD\server\enterprise"
+git fetch
+git rebase --autostash
+
+# 5. Restart Odoo
+net stop "odoo-server-19.0"
+net start "odoo-server-19.0"
+
+# 6. If conflicts occur — discard local changes:
+git reset --hard origin/19.0</code></pre>
+            <div class="alert alert-info"><strong>Installer vs Git:</strong> The <code>.exe</code> installer is easier to manage — just re-download and reinstall. Git clone gives you daily updates and more control, but requires manual Python environment setup. For production Windows deployments, the installer method is recommended.</div>
+            </div>
+        </details>
+
+
+    </div>
+</article>
+
+<footer>
+    <p class="footer-line"><strong>Odoo Deployment Guide</strong></p>
+    <p class="footer-line">Made with ❤️ by <strong>Emad Felaya</strong> · February 2026</p>
+    <p style="opacity:.6;font-size:.8rem;margin-top:.4rem">Covers Enterprise &amp; Community · Ubuntu 24.04 LTS · PostgreSQL 16 · Python 3.10+ · Version 19.0</p>
+</footer>
+
+</body>
+</html>
