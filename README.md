@@ -1,4 +1,4 @@
-# OdooXG — Enterprise DevOps Deployment Guide for Odoo Installation & Production Scaling
+# OdooXG — Enterprise Deployment Guide
 
 <div align="center">
 
