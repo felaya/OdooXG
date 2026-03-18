@@ -1,4 +1,4 @@
-# OdooXG - Enterprise DevOps Deployment Guide
+# OdooXG - Enterprise Deployment Guide
 
 <div align="center">
 
